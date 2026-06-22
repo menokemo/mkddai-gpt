@@ -1,43 +1,49 @@
 # PostgreSQL Database Plan
 
-## Purpose
-
-PostgreSQL will be the real memory layer.
+PostgreSQL is required and must be created automatically by the installer.
 
 ## Tables
 
 ### ai_projects
 
-Stores project-level metadata.
+Stores real project records.
+
+### ai_conversations
+
+Stores conversation/session records.
+
+### ai_messages
+
+Stores clean user/assistant messages for long-term conversation memory.
 
 ### ai_project_memory
 
-Stores memory and decisions.
+Stores project decisions, summaries, next actions, and risks.
 
 ### ai_agent_runs
 
-Stores each agent run summary.
+Stores each employee/agent run.
 
 ### ai_tasks
 
-Stores tasks and ownership.
+Stores generated tasks.
 
 ### ai_qa_reports
 
-Stores QA results.
+Stores QA results and revision state.
 
-## Initial Schema
+### ai_research_reports
 
-The v3 installer includes initial tables:
+Stores internet/search research output.
 
-```text
-ai_projects
-ai_project_memory
-ai_agent_runs
-ai_tasks
-ai_qa_reports
-```
+### ai_builder_temporary_workflow
 
-## Memory Strategy
+Temporary builder/debug workflow storage.
 
-Use PostgreSQL for structured memory and GitHub markdown files for human-readable memory.
+### n8n_chat_histories
+
+Used by n8n Postgres Chat Memory.
+
+## Key Rule
+
+Do not manually create these tables on a fresh VM. The installer must create them.

@@ -1,66 +1,38 @@
 # MKDD AI Factory v3
 
-MKDD AI Factory v3 is a self-hosted AI software-production system.
+MKDD AI Factory v3 is a self-hosted AI software-company system.
 
-This version removes LiteLLM and uses OpenRouter directly from n8n AI Agent nodes and OpenHands.
+## Current Final Direction
 
-## Final v3 Stack
+- No LiteLLM in the final stack.
+- n8n is the workflow/orchestration layer.
+- Open WebUI is the user interface.
+- OpenRouter is used directly by n8n AI Agent Chat Model nodes.
+- OpenHands uses OpenRouter directly.
+- PostgreSQL stores memory, projects, tasks, QA, research, and chat history.
+- SearXNG is available for research.
+- Redis is used as support/cache service.
+
+## Final Stack
 
 ```text
 Open WebUI
   -> n8n Webhook
-  -> n8n AI Agent Employees
-  -> OpenRouter Chat Models
+  -> 00_AI_General_Manager
+  -> Intent Analyzer / Router
+  -> Specialized AI Employees
   -> PostgreSQL Memory
   -> GitHub
   -> OpenHands
   -> QA / Delivery
-  -> Open WebUI Response
 ```
 
-## Removed From v3
-
-- LiteLLM service
-- LiteLLM folder
-- LiteLLM master key
-- LiteLLM model gateway
-- Open WebUI -> LiteLLM connection
-- HTTP/JSON employee workflow
-
-## Kept / Added
-
-- Open WebUI
-- n8n
-- OpenHands
-- OpenRouter
-- PostgreSQL
-- GitHub
-- SearXNG
-- Redis
-- n8n AI Agent nodes
-- IF / Switch / Merge workflow logic
-- PostgreSQL memory plan
-
-## Core Rule
-
-The workflow must be built with n8n visual nodes, not code.
-
-Avoid:
-
-- Code nodes
-- Function nodes
-- JavaScript
-- Python
-- Raw employee JSON bodies
+## Important Installer
 
 Use:
 
-- AI Agent nodes
-- OpenRouter Chat Model nodes
-- IF / Switch nodes
-- Merge nodes
-- Edit Fields nodes
-- PostgreSQL nodes
-- GitHub nodes
-- Respond to Webhook
-- HTTP Request only for OpenHands service calls
+```text
+install_ai_factory_v3.sh
+```
+
+The installer now creates the required PostgreSQL tables automatically.

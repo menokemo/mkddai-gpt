@@ -1,42 +1,65 @@
 # Installer Plan
 
-## v3 Installer
+## Final Installer
 
 File:
 
 ```text
-install_ai_factory_v3_no_litellm.sh
+install_ai_factory_v3.sh
 ```
 
-## Changes
+## What it installs
 
-Removed:
+- Docker
+- PostgreSQL
+- Redis
+- SearXNG
+- n8n
+- Open WebUI
+- OpenHands
 
-- LiteLLM service
-- LiteLLM environment variables
-- Open WebUI -> LiteLLM wiring
+## What it removes from final design
 
-Added:
+- LiteLLM
 
-- PostgreSQL schema init for AI Factory memory
-- n8n AI-ready stack
-- OpenHands direct OpenRouter instructions
+## Database Schema
 
-## Services
+The installer automatically creates:
 
 ```text
-postgres
-redis
-searxng
-n8n
-open-webui
-openhands
+ai_projects
+ai_conversations
+ai_messages
+ai_project_memory
+ai_agent_runs
+ai_tasks
+ai_qa_reports
+ai_research_reports
+ai_builder_temporary_workflow
+n8n_chat_histories
 ```
 
-## After Install
+## Re-apply schema
 
-1. Open n8n.
-2. Create OpenRouter credential.
-3. Build AI Agent workflow manually.
-4. Open OpenHands and set OpenRouter direct.
-5. Add Open WebUI Pipe to n8n webhook.
+The installer also creates:
+
+```text
+/opt/ai-factory/scripts/apply_schema.sh
+```
+
+Use:
+
+```bash
+cd /opt/ai-factory
+sudo bash scripts/apply_schema.sh
+```
+
+## OpenWebUI Pipe
+
+The installer writes:
+
+```text
+/opt/ai-factory/docs/openwebui_ai_factory_pipe.py
+```
+
+This pipe filters OpenWebUI internal prompts such as title generation, tag generation, and follow-up suggestions so they do not pollute n8n memory.

@@ -1,26 +1,20 @@
 # Changelog
 
-## 2026-06-22
+## 2026-06-23
 
-### Major v3 Decision
+### Installer updated
 
-LiteLLM removed from final script.
+- Final bootstrap script now creates all PostgreSQL tables automatically.
+- Added `scripts/apply_schema.sh`.
+- Added OpenWebUI Pipe v1.0.3.
+- Removed LiteLLM from final installer.
+- Added `ai_research_reports`.
+- Added `n8n_chat_histories` creation fallback.
 
-### Current Architecture
+### Memory issue diagnosed
 
-- n8n uses OpenRouter Chat Model directly.
-- OpenHands uses OpenRouter directly.
-- PostgreSQL stays and becomes memory database.
-- Open WebUI sends to n8n webhook.
+OpenWebUI was sending internal title/tag/follow-up prompts into n8n memory.
 
-### Working Test
-
-Webhook `/webhook/ai-factory-v3` works.
-
-Classifier Agent successfully classified:
-
-```text
-اعمل منصة SaaS لإدارة العيادات
-```
-
-as requiring UI, backend, database, no mobile app unless requested, no AI unless requested, and medium-to-high complexity.
+Fix:
+- Pipe v1.0.3 filters internal prompts.
+- Memory is now cleaner and the General Manager can recall user-provided context better.

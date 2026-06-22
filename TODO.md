@@ -2,24 +2,19 @@
 
 ## Immediate
 
-- [ ] Upload v3 docs to GitHub.
-- [ ] Commit installer v3 no LiteLLM.
-- [ ] Continue manual n8n workflow from working Classifier.
-- [ ] Add PM Agent.
-- [ ] Add Product Analyst.
-- [ ] Add IF routing.
-- [ ] Add UI/UX Agent.
-- [ ] Add Backend Planner.
-- [ ] Add Database Planner.
-- [ ] Add Software Architect.
-- [ ] Add Execution Brief Builder.
-- [ ] Add OpenHands HTTP integration.
-- [ ] Add QA Agent.
-- [ ] Add PostgreSQL memory nodes.
+- [ ] Upload updated GitHub docs.
+- [ ] Keep `install_ai_factory_v3.sh` in the repository.
+- [ ] Add `/docs/openwebui_ai_factory_pipe.py` to the repository.
+- [ ] Update n8n Memory session key from fixed `mkddai-main-chat` to `{{ $json.chat_id }}`.
+- [ ] Build `02_Intent_Analyzer`.
+- [ ] Build Switch Router.
+- [ ] Add Project Manager path.
+- [ ] Add Research Agent path.
+- [ ] Add Save Project path.
 
 ## Later
 
-- [ ] Add deployment workflow.
-- [ ] Add GitHub PR automation.
-- [ ] Add backup/restore.
-- [ ] Add dashboard.
+- [ ] GitHub integration.
+- [ ] OpenHands execution path.
+- [ ] QA loop.
+- [ ] Delivery Manager.

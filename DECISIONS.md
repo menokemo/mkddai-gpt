@@ -1,81 +1,21 @@
 # Decisions
 
-## 1. LiteLLM removed from v3
+## LiteLLM removed
 
-Decision: Remove LiteLLM from the final v3 script.
+LiteLLM is removed from the final bootstrap script.
 
-Reason:
+## PostgreSQL is mandatory
 
-- n8n already has OpenRouter Chat Model support.
-- OpenHands works better with OpenRouter direct.
-- LiteLLM added complexity and debugging overhead.
-- The no-code workflow goal is better served by n8n Chat Model nodes.
+The installer must create all AI Factory tables automatically.
 
-## 2. PostgreSQL remains and expands
+## OpenWebUI internal prompts must be filtered
 
-Decision: PostgreSQL stays in the stack and becomes the future system memory database.
+OpenWebUI sends internal prompts for title/tags/follow-ups. The Pipe must filter these so memory remains clean.
 
-Reason:
+## General Manager remains conversational
 
-- n8n needs a database.
-- The AI Factory needs durable project memory.
-- PostgreSQL is better than files alone for structured status, logs, and tasks.
+`00_AI_General_Manager` should behave like an expert technical general manager, not a parser.
 
-## 3. n8n AI Agent nodes are the employee layer
+## Workflow routing is handled separately
 
-Decision: Employees should be n8n AI Agent nodes.
-
-Reason:
-
-- Prompts are editable as normal text.
-- Models are selected through Chat Model nodes.
-- This avoids raw JSON employee nodes.
-- It matches the no-code requirement.
-
-## 4. OpenRouter is the direct model provider
-
-Decision: n8n AI Agents use OpenRouter Chat Model directly.
-
-OpenHands also uses OpenRouter directly from its own UI settings.
-
-## 5. OpenHands is executor only
-
-Decision: OpenHands should not be the PM, architect, or product owner.
-
-OpenHands receives a strict implementation brief from n8n.
-
-## 6. GitHub is required
-
-Decision: GitHub is required as the project source of truth.
-
-It stores:
-
-- system documentation
-- project code
-- decisions
-- memory markdown
-- tasks
-- delivery history
-
-## 7. Workflow should be smart, not short
-
-Decision: More nodes are acceptable.
-
-The workflow should use IF/Switch/Merge logic so employees do not behave like a dumb linear chain.
-
-## 8. No code nodes in n8n
-
-Decision: No JavaScript, Python, Function, or Code nodes inside n8n.
-
-Allowed nodes:
-
-- AI Agent
-- OpenRouter Chat Model
-- IF
-- Switch
-- Merge
-- Edit Fields
-- PostgreSQL
-- GitHub
-- HTTP Request for OpenHands only
-- Respond to Webhook
+Intent analysis and routing should be handled by hidden nodes after the General Manager.
