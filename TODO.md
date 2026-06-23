@@ -85,6 +85,14 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
   - [ ] `GET /tasks/:project_id` webhook — renders `ai_tasks` rows as a real checkbox list.
   - [ ] `GET/POST /tasks/:task_id/complete` webhook — updates `status` in Postgres on check.
   - [ ] General Manager sends this link whenever tasks are created/updated.
+- [ ] **Path C (preferred once Step 14 exists):** Telegram inline buttons via the "Get Project Tasks" tool — faster on mobile, no separate page.
+
+## 14 — Telegram Integration
+
+- [ ] Create Telegram Bot via @BotFather, store token as n8n credential.
+- [ ] **14a — Notifications:** Telegram node at key pipeline points (execution finished, QA failed, new project started, cost threshold crossed).
+- [ ] **14b — Second entry point:** Telegram Trigger -> normalize to `message`/`chat_id` shape -> `00_AI_General_Manager` -> respond via Telegram node.
+- [ ] **14c — "Get Project Tasks" Tool:** Postgres Tool reading `ai_tasks`, attached to the General Manager; format replies with inline buttons when responding via Telegram.
 
 ## 9 — QA / Revision Loop
 

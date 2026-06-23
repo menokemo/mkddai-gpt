@@ -78,3 +78,7 @@ Decision: implemented as a Postgres-backed **Tool** on `00_AI_General_Manager` (
 - Bounded cost when it is used — the `LIMIT 20` caps how many old messages get pulled into context in one call, so cost per use is predictable and small.
 
 This was built immediately rather than deferred, since the cost profile (rare + bounded) made it cheap enough not to be worth revisiting later.
+
+## Decision: Telegram is for the owner, not a multi-client feature (for now)
+
+MKDD currently has a single owner/user, not multiple external clients talking to the system. Telegram integration is scoped accordingly: push notifications to the owner (solving the Async Execution waiting problem) and a faster mobile entry point for the owner specifically, not a general "notify the client" feature. If/when real external clients are onboarded later, this would need revisiting (e.g. per-client bot or chat mapping), but that's out of scope until there's an actual client.

@@ -160,6 +160,34 @@ If Path A doesn't work through the Pipe:
 
 Build Path B regardless of Path A's outcome — it's the dependable version and reuses an already-proven pattern.
 
+**Path C — Telegram with inline buttons (preferred, once Step 14 exists)**
+Once the Telegram integration (Step 14 below) is built, the owner can ask "what's the status of project X" directly in Telegram, and the General Manager (using a "Get Project Tasks" tool reading `ai_tasks`) replies with the task list plus real **inline buttons** ("✅ Done") to mark tasks complete right there — no separate page needed, and faster on mobile than Path B. Path B stays as the web fallback for anyone not using Telegram.
+
+## Step 14: Telegram Integration
+
+Goal: since MKDD currently has a single owner/user (not yet multiple external clients), Telegram serves two purposes for *that owner*: push notifications, and a second, faster mobile entry point into باجوش.
+
+**14a — Push notifications (solves the Async Execution problem from Step 8 directly)**
+Add a Telegram node (no extra trigger needed) at key points in the pipeline to message the owner directly:
+- When OpenHands execution finishes (Step 7/8) — "مشروعك جاهز!" instead of the owner needing to check back manually.
+- When QA fails (Step 9).
+- When a new project starts.
+- When a project's cost crosses a threshold (ties into the Cost Dashboard, Step 13).
+
+This needs a Telegram Bot (created via @BotFather) and its token stored as an n8n credential.
+
+**14b — Telegram as a second entry point to the General Manager**
+```text
+Telegram Trigger (the owner's messages to the bot)
+  -> normalize to the same shape 00_AI_General_Manager expects (message, chat_id)
+  -> 00_AI_General_Manager (same agent, same Tools, same Memory)
+  -> respond via a Telegram node instead of Respond to Webhook
+```
+Lets the owner talk to باجوش from the Telegram app directly, on top of (not instead of) Open WebUI.
+
+**14c — "Get Project Tasks" Tool + inline buttons**
+A Postgres Tool (same pattern as the conversation-history search Tool) reading `ai_tasks` for a given project, attached to `00_AI_General_Manager`. When replying through Telegram specifically, format the task list with inline buttons so the owner can mark tasks done without leaving the chat. This becomes Path C for Step 8b above.
+
 ## Step 9: QA / Revision Loop
 
 ```text
