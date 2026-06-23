@@ -1,6 +1,10 @@
 # AI Employees
 
-## Employee List
+## 0. General Manager (`00_AI_General_Manager`) — live, the user-facing entry point
+
+Name: **باجوش** ("Bagoosh"). Introduces itself by this name whenever asked. This is the only agent the client directly talks to; see `CURRENT_STATUS.md` for what it can currently do (web search via SearXNG Tool, memory, time awareness) and its full system message.
+
+## Employee List (planned roster — see `NEXT_STEPS.md` for what's actually built)
 
 ### 1. Project Classifier Agent
 

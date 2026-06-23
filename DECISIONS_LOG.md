@@ -64,3 +64,7 @@ Each project gets its own dedicated GitHub repo — projects are never bundled i
 ## Decision: Webhook security uses n8n's native Header Auth, not a custom IF node
 
 Originally planned as a custom IF node comparing a header against `$env.AI_FACTORY_WEBHOOK_SECRET`. Hit two problems: (1) recent n8n versions block `$env` access in node expressions by default for security, and n8n's own docs recommend using credentials instead of unblocking it for sensitive values; (2) it was unnecessary complexity anyway — the Webhook trigger node has a built-in `Authentication` setting (`Header Auth`) that does exactly this natively, rejecting non-matching requests with a 401 before the workflow even runs. Switched to that: zero extra nodes, no env-access workaround needed, and the secret lives in an n8n credential instead of being readable from an exported workflow JSON.
+
+## Decision: General Manager has a name — "باجوش"
+
+The General Manager agent (`00_AI_General_Manager`) was given a name, "باجوش" ("Bagoosh"), instead of staying anonymous. It introduces itself by this name whenever the client asks. Adds a personal touch since this is the only agent the client directly talks to.

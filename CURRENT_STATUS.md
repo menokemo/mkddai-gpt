@@ -9,7 +9,7 @@
 - Docker stack running: PostgreSQL, n8n, Open WebUI, OpenHands, SearXNG (JSON format enabled), Redis.
 - `01_Client_Intake` (webhook) is connected to `00_AI_General_Manager` — confirmed live.
 - `00_AI_General_Manager` has all three inputs wired: Chat Model (OpenRouter), Memory (Postgres), and Tool (native SearXNG node) — confirmed live.
-- System message updated and live: General Manager now actually calls the search Tool when needed (instead of just saying research is needed), and has explicit language rules (match user's language; Egyptian dialect for Arabic).
+- System message updated and live: General Manager (named **باجوش**, introduces itself by this name when asked) now actually calls the search Tool when needed (instead of just saying research is needed), and has explicit language rules (match user's language; Egyptian dialect for Arabic).
 - `01B_Intent_Analyzer` exists, classifies into `CHAT` / `ASK_CLARIFICATION` / `RESEARCH` / `NEW_PROJECT` / `CONTINUE_PROJECT`.
 - OpenWebUI Pipe v1.0.3 filters internal helper prompts; memory pollution issue fixed.
 
