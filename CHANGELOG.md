@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (latest) — Repo cleanup
+
+- Removed 11 stale/duplicate files that contradicted or repeated the current canonical docs: `PROJECT_MASTER_CONTEXT.md`, `DECISIONS.md`, `ARCHITECTURE.md`, `N8N_WORKFLOW_PLAN.md`, `DATABASE_PLAN.md`, `INSTALLER_PLAN.md`, `OPENWEBUI_PIPE.md`, `OPENWEBUI_SETUP.md`, `BOOTSTRAP_NOTES.md`, `README_SYNC.md`, `sync_docs.sh`.
+- Rewrote `README.md` as a clear index of all remaining files and their purpose.
+- Confirmed `workflows/ai-factory-v3.json` already reflects the latest design (dynamic session key, fixed Intent Analyzer input, SearXNG Tool, updated system message) — nothing stale there.
+
 ## 2026-06-23 (latest) — System message rewrite + workflow sync
 
 - Rewrote `00_AI_General_Manager`'s system message:
