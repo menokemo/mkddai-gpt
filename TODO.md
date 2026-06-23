@@ -108,6 +108,13 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 - [ ] Only after Steps 4-10 work manually: consider a dedicated Memory Agent to standardize Postgres memory writes instead of each phase doing it ad-hoc.
 
+## 13 — Cost Dashboard
+
+- [ ] Add `ai_token_usage` table to the installer schema.
+- [ ] **Path A (try first):** Test whether the AI Agent node surfaces OpenRouter's `usage`/`cost` data in its own output.
+- [ ] **Path B (fallback):** HTTP Request node to OpenRouter's `/generation` endpoint, or per-project API keys + OpenRouter's own Activity dashboard.
+- [ ] `GET /costs` webhook — all projects, cost broken down per agent/model, with totals.
+
 ## Always (every step above)
 
 - [ ] Update `BUGS_AND_FIXES.md` for any bug found/fixed.

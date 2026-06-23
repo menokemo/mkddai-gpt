@@ -206,6 +206,32 @@ Handled outside of n8n — the team already runs Nginx Proxy Manager on the serv
 
 Once Steps 4-10 work manually (each step saving its own Postgres record), consider adding a dedicated Memory Agent that standardizes how summaries get written into `ai_project_memory`, instead of every phase doing its own ad-hoc Postgres write. Lower priority — only worth it once the manual version proves repetitive.
 
+## Step 13: Cost Dashboard
+
+Goal: a page showing every project, and within each project, the cost broken down by which agent (employee) ran and which model it used — so projects can be priced correctly and nothing gets run at a loss.
+
+New table needed (add to `install_ai_factory_v3.sh`'s schema):
+```sql
+CREATE TABLE IF NOT EXISTS ai_token_usage (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT REFERENCES ai_projects(id) ON DELETE CASCADE,
+    agent_name TEXT NOT NULL,      -- e.g. 'PM Agent', 'Architect Agent'
+    model_name TEXT NOT NULL,      -- e.g. 'openai/gpt-4o', 'deepseek/deepseek-coder'
+    prompt_tokens INT,
+    completion_tokens INT,
+    cost_usd NUMERIC(10,6),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+`GET /costs` webhook renders all projects with a per-agent/per-model cost breakdown and a total, reading from this table (same pattern as the Design Variants / Task List preview pages).
+
+OpenRouter now returns token counts **and** cost in USD automatically in every chat completion response (`usage.cost`) — no second API call needed to fetch cost separately.
+
+**Path A (try first):** Check whether the AI Agent node (the high-level node used for every employee) surfaces this `usage`/`cost` data in its own output, so a Postgres "Save Usage" node can read it directly with zero extra calls. Unconfirmed — needs a live test, since the high-level node may abstract this away.
+
+**Path B (fallback if Path A doesn't expose it):** Add a plain HTTP Request node after the agent's underlying chat-model call to fetch cost via OpenRouter's `/generation` endpoint using the response's generation id, or rely on OpenRouter's own per-API-key Activity/Analytics dashboard (requires one API key per project for clean separation, which adds operational overhead).
+
 ## Always
 
 Keep `BUGS_AND_FIXES.md`, `CHANGELOG.md`, and `PROJECT_SUMMARY.md` updated for every change made in any of the steps above.
