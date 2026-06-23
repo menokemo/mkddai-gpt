@@ -68,3 +68,13 @@ Originally planned as a custom IF node comparing a header against `$env.AI_FACTO
 ## Decision: General Manager has a name — "باجوش"
 
 The General Manager agent (`00_AI_General_Manager`) was given a name, "باجوش" ("Bagoosh"), instead of staying anonymous. It introduces itself by this name whenever the client asks. Adds a personal touch since this is the only agent the client directly talks to.
+
+## Decision: Conversation history search is an on-demand Tool, not always-loaded context
+
+The General Manager needs to be able to answer "when did we discuss X" / "what did we agree on last week" type questions, referencing the full conversation history, not just the last few messages already in its rolling Memory window. Considered loading the whole history into context every turn — rejected for cost reasons (token cost would scale with conversation length on every single turn, even when irrelevant).
+
+Decision: implemented as a Postgres-backed **Tool** on `00_AI_General_Manager` (same pattern as the SearXNG search Tool), querying `n8n_chat_histories` for the current `chat_id`, sorted by `id DESC`, capped with `LIMIT 20`. Cost impact:
+- Zero extra cost on the vast majority of turns — the model only calls this tool when the user explicitly references something from the conversation's past.
+- Bounded cost when it is used — the `LIMIT 20` caps how many old messages get pulled into context in one call, so cost per use is predictable and small.
+
+This was built immediately rather than deferred, since the cost profile (rare + bounded) made it cheap enough not to be worth revisiting later.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (latest) — Conversation-history search Tool + Time Awareness confirmed live
+
+- Added a Postgres-backed Tool to `00_AI_General_Manager` (same pattern as SearXNG): queries `n8n_chat_histories` for the current `chat_id`, sorted newest-first, `LIMIT 20`. Lets it answer "when did we discuss X" questions on demand.
+- Cost analysis: zero extra cost on normal turns (model only calls it when the user references conversation history), bounded cost when used (`LIMIT 20`). See `DECISIONS_LOG.md`.
+- Time Awareness fully confirmed live after the timezone fix — General Manager now reports the correct current time.
+
 ## 2026-06-23 (latest) — n8n timezone fixed to Europe/Amsterdam
 
 - Added `GENERIC_TIMEZONE` and `TZ` env vars (set to `Europe/Amsterdam`, matching the team's chosen timezone) to the n8n service in `install_ai_factory_v3.sh`'s `docker-compose.yml`. Without this, `$now` was returning UTC-4, several hours off, causing the General Manager to report the wrong current time despite the Time Awareness feature working correctly otherwise.
