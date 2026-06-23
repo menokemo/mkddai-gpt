@@ -31,7 +31,18 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Save Project (Postgres -> `ai_projects`).
 - [ ] PM Agent.
 - [ ] Product Analyst Agent (with SearXNG Tool if needed).
-- [ ] Architect Agent.
+- [ ] **Design Variants Gate (only if UI is needed):**
+  - [ ] Add `ai_design_variants` table to the installer schema.
+  - [ ] UI/UX Designer Agent derives sitemap from PM/Product Analyst output (no invented pages).
+  - [ ] Pick 3-4 representative pages per platform (web/app).
+  - [ ] Generate 2 Design Variants (A/B) per platform as real HTML + Tailwind, one design system reused per variant, real internal navigation between that variant's pages.
+  - [ ] Use a cheaper coding model (DeepSeek/Qwen Coder via OpenRouter) for this step specifically.
+  - [ ] Save each page as a row in `ai_design_variants`.
+  - [ ] Add `GET /preview/:project_id/:variant/:page_slug` webhook to render stored HTML.
+  - [ ] Build branded Presentation Page listing all variants with live previews.
+  - [ ] Add `GET /choose/:project_id/:variant` webhook to mark chosen/rejected and show confirmation.
+  - [ ] Send Presentation Page link to client via `99_Client_Response`.
+- [ ] Architect Agent (uses the chosen variant's HTML as the real starting point).
 - [ ] Security Reviewer Agent (reviews the Architect's plan).
 - [ ] Save Project Memory (Postgres -> `ai_project_memory`).
 - [ ] Response back to user with the plan summary.

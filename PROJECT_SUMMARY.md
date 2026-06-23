@@ -40,6 +40,8 @@ Open WebUI  -> n8n Webhook -> 00_AI_General_Manager -> Intent Analyzer / Router
 ### ⏳ Planned / not built yet
 | Feature | Idea | Why / Reasoning | Status |
 |---|---|---|---|
+| Design Variants Gate | UI/UX Designer Agent generates 2 real HTML/Tailwind design variants per platform (3-4 real pages each, derived from PRD/functional requirements), client previews on a branded Presentation Page and picks one before any execution spend | Real code (not images) gives OpenHands an actual implementation target (~90%+ accuracy) instead of a guess from a picture; letting the client choose upfront avoids wasted execution tokens and looks professional | Not built — see `NEXT_STEPS.md` Step 4b and `AGENTS.md` (UI/UX Designer) |
+|---|---|---|---|
 | Custom name/icon per project chat | Each conversation in Open WebUI represents one project — explored whether OpenWebUI auto-generates a custom name and icon per chat. Title generation is native (already filtered as an internal prompt in the Pipe). A distinct **icon** per individual chat is not a native OpenWebUI feature; closest native option is the Folders & Projects feature (folder per project) instead of per-chat icons. | Would make it easier to visually tell projects apart in the sidebar | Deferred — investigate later, likely to be handled inside `openwebui_ai_factory_pipe.py` (the Pipe function) rather than OpenWebUI settings, since OpenWebUI itself has no native per-chat icon mechanism |
 |---|---|---|---|
 | New Project path | Save Project → PM Agent → Product Analyst → Architect | Core flow for handling new software project requests | Not built |

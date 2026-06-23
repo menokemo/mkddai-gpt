@@ -62,15 +62,28 @@ Produces:
 
 Runs only if UI is needed.
 
+Builds on the PM Agent's PRD and the Product Analyst's functional requirements — never invents pages from nothing.
+
 Produces:
 
-- sitemap
+- sitemap (real pages derived from the PRD/functional requirements)
 - pages
 - components
 - flows
 - states
 - RTL
 - accessibility
+
+Then, for each platform the project needs (e.g. web, mobile app):
+
+1. Picks the 3-4 most representative pages from its own sitemap (e.g. for an e-commerce project: home, product listing, product detail, cart/contact).
+2. Produces **2 Design Variants** (Variant A / Variant B), each as real HTML + Tailwind CSS for all 3-4 pages — not images, not descriptions, so OpenHands later has actual code to build from instead of guessing from a picture.
+3. Defines the design system (colors, fonts, spacing) once per variant and reuses it across that variant's pages, to keep token cost down.
+4. Wires real `<a href>` navigation between the pages of the same variant, so it behaves like a clickable prototype, not isolated screenshots.
+5. Saves every page into `ai_design_variants` (one row per page, see schema below).
+6. The chosen, cheaper coding model (e.g. DeepSeek/Qwen Coder via OpenRouter, not GPT-4o) is used for this HTML/CSS generation step specifically, to control token cost — see `DECISIONS_LOG.md`.
+
+The client previews all variants on a single branded Presentation Page (built the same way, plain HTML) and picks one with a single click (a plain link to a small "choose" webhook — no JavaScript required). Only the chosen variant's pages continue to Frontend Planner / Execution; the rejected variant's pages are marked `chosen = false` and never built.
 
 ### 7. Frontend Planner
 
