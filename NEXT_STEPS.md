@@ -172,7 +172,37 @@ Delivery Agent (AI Agent: own Model) -- final No-AI-Fingerprint pass, see AGENTS
   -> 99_Client_Response (final friendly summary to the user)
 ```
 
-## Step 11: Memory Agent (cross-cutting)
+## Step 11: Post-Delivery Archive & Cleanup (manual confirmation required)
+
+Goal: once a project is fully delivered, free up VM disk space (OpenHands workspace files, heavy Postgres rows) while keeping everything recoverable through the project's own GitHub repo — and never touching the permanent project record itself.
+
+**This step never runs automatically.** It only runs after an explicit confirmation from the team (e.g. "project X is delivered, archive and clean it up?" -> yes). Irreversible cleanup must never be a side-effect of normal delivery.
+
+```text
+1. Archive: write everything worth keeping into the project's own repo (docs/ folder):
+   - the chosen Design Variant's HTML pages
+   - a JSON export of ai_project_memory
+   - QA reports (ai_qa_reports)
+   - the final task list (ai_tasks)
+2. Confirmation gate: ask explicitly, wait for yes.
+3. Cleanup (only after yes):
+   - delete the project's local OpenHands workspace files on the VM
+   - delete the now-archived rows from ai_design_variants, ai_tasks, ai_project_memory, ai_qa_reports for this project_id
+4. Permanent Retention Rule (see DECISIONS_LOG.md): the ai_projects row itself is NEVER deleted.
+   Only its status changes (e.g. to 'delivered_archived'). Its id, project_slug, and repo_url
+   stay in the database forever, so the project can always be found and its repo opened again,
+   even years later, even though the heavy working data has been cleaned up.
+```
+
+## Repo-per-Project Rule
+
+A GitHub repo is created **only once the client has approved a project's direction** (after the Confirmation Gate in Step 6/Design Variants Gate, right before Execution starts) — not at every conversation, and not for ideas still being discussed. Each project gets its own dedicated repo; projects are never bundled together into one shared repo.
+
+## Domains (Nginx Proxy Manager)
+
+Handled outside of n8n — the team already runs Nginx Proxy Manager on the server. Each user-facing service (n8n editor/webhooks, design preview pages, task-list pages) should get its own subdomain through it (e.g. `n8n.yourdomain.com`, `preview.yourdomain.com`) instead of being shared on bare IP:port links sent to clients. No build work needed here beyond assigning subdomains as each webhook is built.
+
+## Step 12: Memory Agent (cross-cutting)
 
 Once Steps 4-10 work manually (each step saving its own Postgres record), consider adding a dedicated Memory Agent that standardizes how summaries get written into `ai_project_memory`, instead of every phase doing its own ad-hoc Postgres write. Lower priority — only worth it once the manual version proves repetitive.
 

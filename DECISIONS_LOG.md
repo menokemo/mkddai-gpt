@@ -52,3 +52,11 @@ Cost-control measures applied to this step specifically (so the added quality do
 - Tailwind utility classes are used instead of verbose custom CSS.
 - No separate Vision/QA agent reviews the generated mockups — the human client is the judge.
 - Only the 3-4 most representative pages get a custom mockup; routine pages are left to Frontend Planner to build later using the same design system.
+
+## Decision: Permanent Retention Rule for ai_projects
+
+A project's `ai_projects` row — specifically `id`, `project_slug`, and `repo_url` — is **never deleted**, under any circumstance, even after a project is fully delivered and its working data is cleaned up to save VM disk space. Only `status` changes (e.g. to `delivered_archived`). This guarantees the project can always be found and its GitHub repo reopened later, no matter how much time has passed, even though heavier data (design variants, tasks, QA reports, memory) gets archived into the repo itself and then deleted from Postgres. Post-delivery cleanup itself only ever runs after an explicit manual confirmation — never automatically — since it's irreversible.
+
+## Decision: One GitHub repo per project, created only after approval
+
+Each project gets its own dedicated GitHub repo — projects are never bundled into one shared repo. The repo is created only once the client has approved the project's direction (right before Execution starts, after the Design Variants Gate / Confirmation Gate), not at the start of every conversation and not while an idea is still just being discussed.

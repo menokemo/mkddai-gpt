@@ -97,7 +97,14 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Update `ai_project_memory` / `ai_projects.status = done`.
 - [ ] Final response to user.
 
-## 11 — Memory Agent (later, lower priority)
+## 11 — Post-Delivery Archive & Cleanup (manual confirmation required, never automatic)
+
+- [ ] Archive node: write chosen Design Variant HTML, `ai_project_memory` export, QA reports, and final task list into the project's repo (`docs/`).
+- [ ] Explicit confirmation step before any deletion happens.
+- [ ] Cleanup node (only after confirmation): delete local OpenHands workspace files + the now-archived Postgres rows (`ai_design_variants`, `ai_tasks`, `ai_project_memory`, `ai_qa_reports`) for that `project_id`.
+- [ ] **Never delete the `ai_projects` row itself** — only update its `status`. `id`, `project_slug`, and `repo_url` must remain permanently retrievable.
+
+## 12 — Memory Agent (later, lower priority)
 
 - [ ] Only after Steps 4-10 work manually: consider a dedicated Memory Agent to standardize Postgres memory writes instead of each phase doing it ad-hoc.
 
