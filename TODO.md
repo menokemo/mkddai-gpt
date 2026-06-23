@@ -10,8 +10,8 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 1 — Webhook Security
 
-- [ ] Add shared-secret header check right after `01_Client_Intake`.
-- [ ] Update the OpenWebUI Pipe to send the secret header.
+- [ ] Add shared-secret header check right after `01_Client_Intake` (n8n side, build together).
+- [x] Update the OpenWebUI Pipe to send the secret header — done in installer (`AI_FACTORY_WEBHOOK_SECRET` + Pipe sends `X-AI-Factory-Secret`).
 - [ ] Confirm requests without the correct header are rejected.
 
 ## 1b — Time Awareness for Every Agent
@@ -38,7 +38,7 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] PM Agent.
 - [ ] Product Analyst Agent (with SearXNG Tool if needed).
 - [ ] **Design Variants Gate (only if UI is needed):**
-  - [ ] Add `ai_design_variants` table to the installer schema.
+- [x] Add `ai_design_variants` table to the installer schema — done.
   - [ ] UI/UX Designer Agent derives sitemap from PM/Product Analyst output (no invented pages).
   - [ ] Pick 3-4 representative pages per platform (web/app).
   - [ ] Generate 2 Design Variants (A/B) per platform as real HTML + Tailwind, one design system reused per variant, real internal navigation between that variant's pages.
@@ -110,7 +110,7 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 13 — Cost Dashboard
 
-- [ ] Add `ai_token_usage` table to the installer schema.
+- [x] Add `ai_token_usage` table to the installer schema — done.
 - [ ] **Path A (try first):** Test whether the AI Agent node surfaces OpenRouter's `usage`/`cost` data in its own output.
 - [ ] **Path B (fallback):** HTTP Request node to OpenRouter's `/generation` endpoint, or per-project API keys + OpenRouter's own Activity dashboard.
 - [ ] `GET /costs` webhook — all projects, cost broken down per agent/model, with totals.

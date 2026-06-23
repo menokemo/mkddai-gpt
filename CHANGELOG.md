@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-23 (latest) — Installer fully updated for everything except the n8n workflow itself
+
+- `.env` now generates `AI_FACTORY_WEBHOOK_SECRET`, printed at the end of installation and saved in `/opt/ai-factory/.env`.
+- `db-init/01-ai-factory-schema.sql` (built by the installer): added `ai_design_variants` (Design Variants Gate) and `ai_token_usage` (Cost Dashboard) tables + indexes.
+- `docs/openwebui_ai_factory_pipe.py`: now sends `X-AI-Factory-Secret` header on every webhook call using a `webhook_secret` field (placeholder `YOUR_WEBHOOK_SECRET`, to be replaced with the real generated value).
+- `README-FIRST.md`: updated with instructions to copy the webhook secret into the Pipe, and a note that the actual webhook-security check (the IF node comparing this header) is built inside n8n itself, not by the installer.
+- Note: `ai_tasks` (Interactive Task List) already existed from the original schema — no change needed there. Time Awareness's `created_at` column was already added in an earlier commit.
+- Everything n8n-workflow-side (Error Handling, real Intent Router, New/Continue Project paths, Confirmation Gate, Execution, Async handling, QA/Revision, Delivery, Archive & Cleanup, the webhook-security IF node itself) is intentionally left for building together node by node in n8n — not part of this script.
+
 ## 2026-06-23 (latest) — Time Awareness policy + schema change
 
 - Added `created_at` column (+ index) to `n8n_chat_histories` in `install_ai_factory_v3.sh`, so real per-message timestamps are available. Re-run `scripts/apply_schema.sh` on the live server to apply this to the existing database.

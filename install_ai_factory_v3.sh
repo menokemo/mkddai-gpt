@@ -48,6 +48,11 @@ N8N_ENCRYPTION_KEY=$(openssl rand -hex 32)
 OPENWEBUI_SECRET_KEY=$(openssl rand -hex 32)
 OPENHANDS_BASE_URL=http://openhands:3000
 SEARXNG_BASE_URL=http://searxng:8080
+
+# Shared secret the OpenWebUI Pipe sends in a header so the n8n webhook can
+# reject requests that don't come from our own Pipe. Copy this value into
+# the Pipe's webhook_secret field (see README-FIRST.md).
+AI_FACTORY_WEBHOOK_SECRET=$(openssl rand -hex 24 | tr -d '\n')
 EOF
 fi
 
@@ -142,6 +147,34 @@ CREATE TABLE IF NOT EXISTS ai_research_reports (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Design Variants Gate: each row is one page of one design variant (A/B)
+-- for one platform (web/app). The client previews these as real HTML and
+-- picks a variant before any execution spend.
+CREATE TABLE IF NOT EXISTS ai_design_variants (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT REFERENCES ai_projects(id) ON DELETE CASCADE,
+    platform TEXT NOT NULL,        -- 'web' | 'app'
+    variant_label TEXT NOT NULL,   -- 'A' | 'B'
+    page_slug TEXT NOT NULL,       -- 'home' | 'products' | 'product-detail' | ...
+    html_content TEXT NOT NULL,
+    chosen BOOLEAN,                -- NULL until the client decides
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Cost Dashboard: one row per agent call, so cost can be broken down per
+-- project, per agent (employee), and per model. OpenRouter returns cost in
+-- USD automatically in every response.
+CREATE TABLE IF NOT EXISTS ai_token_usage (
+    id BIGSERIAL PRIMARY KEY,
+    project_id BIGINT REFERENCES ai_projects(id) ON DELETE CASCADE,
+    agent_name TEXT NOT NULL,
+    model_name TEXT NOT NULL,
+    prompt_tokens INT,
+    completion_tokens INT,
+    cost_usd NUMERIC(10,6),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS n8n_chat_histories (
     id SERIAL PRIMARY KEY,
     session_id VARCHAR(255) NOT NULL,
@@ -169,6 +202,8 @@ CREATE INDEX IF NOT EXISTS idx_ai_tasks_project_id ON ai_tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_ai_agent_runs_project_id ON ai_agent_runs(project_id);
 CREATE INDEX IF NOT EXISTS idx_n8n_chat_histories_session_id ON n8n_chat_histories(session_id);
 CREATE INDEX IF NOT EXISTS idx_n8n_chat_histories_session_created ON n8n_chat_histories(session_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_design_variants_project_id ON ai_design_variants(project_id);
+CREATE INDEX IF NOT EXISTS idx_ai_token_usage_project_id ON ai_token_usage(project_id);
 EOF
 
 cat > "$APP_DIR/scripts/apply_schema.sh" <<'EOF'
@@ -337,6 +372,9 @@ class Pipe:
     def __init__(self):
         self.name = "AI Factory"
         self.webhook_url = "http://YOUR_SERVER_IP:5678/webhook/ai-factory-v3"
+        # Copy the AI_FACTORY_WEBHOOK_SECRET value printed at the end of the
+        # installer (also saved in /opt/ai-factory/.env) into this field.
+        self.webhook_secret = "YOUR_WEBHOOK_SECRET"
 
     async def pipe(self, body: dict) -> str:
         messages = body.get("messages", [])
@@ -369,7 +407,12 @@ class Pipe:
         }
 
         try:
-            response = requests.post(self.webhook_url, json=payload, timeout=900)
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                headers={"X-AI-Factory-Secret": self.webhook_secret},
+                timeout=900,
+            )
             response.raise_for_status()
 
             try:
@@ -413,7 +456,9 @@ sudo bash scripts/apply_schema.sh
 
 Copy `/opt/ai-factory/docs/openwebui_ai_factory_pipe.py` into Open WebUI Functions/Pipes.
 
-Replace `YOUR_SERVER_IP`.
+Replace `YOUR_SERVER_IP` and `YOUR_WEBHOOK_SECRET` (the real secret value is in `/opt/ai-factory/.env` as `AI_FACTORY_WEBHOOK_SECRET`, and is also printed at the end of this installer).
+
+The n8n workflow's webhook-security check (an IF node comparing the `X-AI-Factory-Secret` header against this value) is built separately, node by node, inside n8n itself — not by this installer.
 EOF
 
 chown -R 1000:1000 "$APP_DIR/n8n" || true
@@ -432,3 +477,6 @@ echo "Open WebUI: http://YOUR_SERVER_IP:8080"
 echo "n8n:        http://YOUR_SERVER_IP:5678"
 echo "OpenHands:  http://YOUR_SERVER_IP:3000"
 echo "SearXNG:    http://YOUR_SERVER_IP:8081"
+echo
+echo "AI_FACTORY_WEBHOOK_SECRET (copy this into the OpenWebUI Pipe's webhook_secret field):"
+echo "${AI_FACTORY_WEBHOOK_SECRET}"
