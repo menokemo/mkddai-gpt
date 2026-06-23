@@ -61,6 +61,7 @@ Add the actual `01C_Intent_Router` Switch node (not a placeholder) after `01B_In
 01C_Intent_Router (NEW_PROJECT)
   -> Save Project (Postgres insert into ai_projects)
   -> PM Agent (AI Agent: own Model; no memory needed)
+  -> Rename OpenWebUI chat (HTTP Request -> POST /api/v1/chats/{chat_id}, body: {"title": "{emoji} {official project title from PM Agent}"}) — needs an OpenWebUI API key as a credential
   -> Product Analyst Agent (AI Agent: own Model; SearXNG Tool shared if it needs market research)
   -> [if UI is needed] Step 4b: Design Variants Gate
   -> Architect Agent (AI Agent: own Model)

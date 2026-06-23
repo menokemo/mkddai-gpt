@@ -37,6 +37,7 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 - [ ] Save Project (Postgres -> `ai_projects`).
 - [ ] PM Agent.
+- [ ] Rename OpenWebUI chat to `{emoji} {official project title}` via `POST /api/v1/chats/{chat_id}` (needs OpenWebUI API key credential).
 - [ ] Product Analyst Agent (with SearXNG Tool if needed).
 - [ ] **Design Variants Gate (only if UI is needed):**
 - [x] Add `ai_design_variants` table to the installer schema — done.
