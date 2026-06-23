@@ -14,6 +14,12 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Update the OpenWebUI Pipe to send the secret header.
 - [ ] Confirm requests without the correct header are rejected.
 
+## 1b — Time Awareness for Every Agent
+
+- [ ] Re-run `scripts/apply_schema.sh` on the live server to add `created_at` to `n8n_chat_histories`.
+- [ ] Add `01A_Time_Context` Postgres node after `01_Client_Intake`, running on every message (not just session start), fetching the last message's `created_at` for this `chat_id`.
+- [ ] Update every agent's system message to include current time + last-message time (see `AGENTS.md` -> Time Awareness Policy).
+
 ## 2 — Error Handling
 
 - [ ] Build a dedicated n8n Error Workflow.

@@ -191,7 +191,14 @@ Agents should not all run blindly.
 
 The workflow should route them based on project needs.
 
-## No-AI-Fingerprint Policy
+## Time Awareness Policy
+
+Models have no real internal clock — they tend to guess elapsed time from conversational patterns in their training data, which causes hallucinated time gaps (e.g. claiming "last week" when the previous message was 4 minutes ago, or the reverse). To prevent this, **every** agent gets real timestamp context on **every turn**, not just at the start of a session:
+
+- Current real time (`$now`).
+- The real timestamp of the user's previous message in this same conversation (from `n8n_chat_histories.created_at`).
+
+This is injected the same way for every agent (General Manager, Intent Analyzer, PM, Architect, etc.) so none of them ever narrates an elapsed-time claim that isn't backed by a real number. See `NEXT_STEPS.md` for the `01A_Time_Context` node that supplies this.
 
 Every project delivered by the system must look like it was written by a human developer, with zero trace of AI involvement (no AI-mentioning comments, commit messages, docstrings, or naming patterns). This is enforced at three checkpoints, not just one, because a single check can be bypassed by what OpenHands actually writes:
 

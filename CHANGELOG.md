@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (latest) — Time Awareness policy + schema change
+
+- Added `created_at` column (+ index) to `n8n_chat_histories` in `install_ai_factory_v3.sh`, so real per-message timestamps are available. Re-run `scripts/apply_schema.sh` on the live server to apply this to the existing database.
+- Documented `01A_Time_Context` node plan (runs on every message, not just session start) and the global Time Awareness Policy in `AGENTS.md`: every agent gets current real time + the user's last-message time on every turn, to stop hallucinated elapsed-time claims.
+- Logged the decision in `DECISIONS_LOG.md`; added to `NEXT_STEPS.md` (Step 1b) and `TODO.md`.
+
 ## 2026-06-23 (latest) — Repo cleanup
 
 - Removed 11 stale/duplicate files that contradicted or repeated the current canonical docs: `PROJECT_MASTER_CONTEXT.md`, `DECISIONS.md`, `ARCHITECTURE.md`, `N8N_WORKFLOW_PLAN.md`, `DATABASE_PLAN.md`, `INSTALLER_PLAN.md`, `OPENWEBUI_PIPE.md`, `OPENWEBUI_SETUP.md`, `BOOTSTRAP_NOTES.md`, `README_SYNC.md`, `sync_docs.sh`.

@@ -16,6 +16,24 @@ Add a simple shared-secret check right after `01_Client_Intake`:
 - An `IF` node checks the header against the expected value (stored in n8n credentials/env, not hardcoded).
 - If it doesn't match, route to a node that responds with an error and stops, instead of continuing to the General Manager.
 
+## Step 1b: Time Awareness for Every Agent (every turn, not just session start)
+
+Goal: stop agents from hallucinating elapsed time (e.g. claiming "last week" when the previous message was minutes ago, or the reverse) by giving them a real timestamp instead of letting them guess from conversational patterns.
+
+Schema change (already added to `install_ai_factory_v3.sh`, re-run `scripts/apply_schema.sh` on the live server to apply it):
+```sql
+ALTER TABLE n8n_chat_histories ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+```
+
+Add a node right after `01_Client_Intake` (e.g. `01A_Time_Context`, a Postgres node) that runs on **every** incoming message, not just the first one in a session:
+```sql
+SELECT created_at FROM n8n_chat_histories
+WHERE session_id = '{{ $json.body.chat_id }}'
+ORDER BY id DESC LIMIT 1
+```
+
+Every agent's system message includes the same two facts (current real time + this last-message timestamp) so the model reasons from real numbers instead of guessing. See `AGENTS.md` -> Time Awareness Policy. The model decides what counts as a "long" or "short" gap itself — no hardcoded threshold.
+
 ## Step 2: Error Handling
 
 Build a dedicated n8n **Error Workflow** and attach it to `ai-factory-v3` (Workflow Settings -> Error Workflow):

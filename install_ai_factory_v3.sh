@@ -148,6 +148,12 @@ CREATE TABLE IF NOT EXISTS n8n_chat_histories (
     message JSONB NOT NULL
 );
 
+-- Added so every agent can compute the real time gap since the user's last
+-- message (per-turn, not just at session start) instead of guessing from
+-- conversational patterns. Safe to add to an existing table: n8n's own
+-- inserts don't reference this column, so it's filled by the DEFAULT.
+ALTER TABLE n8n_chat_histories ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
 CREATE TABLE IF NOT EXISTS ai_builder_temporary_workflow (
     id BIGSERIAL PRIMARY KEY,
     name TEXT,
@@ -162,6 +168,7 @@ CREATE INDEX IF NOT EXISTS idx_ai_messages_conversation_id ON ai_messages(conver
 CREATE INDEX IF NOT EXISTS idx_ai_tasks_project_id ON ai_tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_ai_agent_runs_project_id ON ai_agent_runs(project_id);
 CREATE INDEX IF NOT EXISTS idx_n8n_chat_histories_session_id ON n8n_chat_histories(session_id);
+CREATE INDEX IF NOT EXISTS idx_n8n_chat_histories_session_created ON n8n_chat_histories(session_id, created_at DESC);
 EOF
 
 cat > "$APP_DIR/scripts/apply_schema.sh" <<'EOF'

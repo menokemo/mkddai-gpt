@@ -36,7 +36,9 @@ The General Manager (`00_AI_General_Manager`) has n8n's native **SearXNG** tool 
 
 The installer pre-creates `searxng/settings.yml` with `format: json` enabled before the stack starts, instead of relying on SearXNG's own defaults (which disable JSON). This was required for any tool/HTTP call expecting structured search results to work without a manual server-side edit after install.
 
-## Decision: Design mockups must be real code, not generated images, and the client chooses before execution
+## Decision: Every agent gets real timestamp context on every turn
+
+Models have no internal clock and tend to hallucinate elapsed time from conversational patterns (e.g. claiming "last week" when the previous message was minutes ago). Fix: a `created_at` column was added to `n8n_chat_histories`, and a node (`01A_Time_Context`) fetches the real timestamp of the user's previous message on **every** incoming message — not only at the start of a session, since the hallucination happens turn-to-turn too. Every agent's system message gets both the current real time and that last-message time, and decides for itself what counts as a meaningful gap (no hardcoded threshold). This is a global rule applied to all agents, not just the General Manager — see `AGENTS.md`.
 
 Two related decisions made together:
 
