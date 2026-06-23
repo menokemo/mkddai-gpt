@@ -10,9 +10,9 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 1 — Webhook Security
 
-- [ ] Add shared-secret header check right after `01_Client_Intake` (n8n side, build together).
-- [x] Update the OpenWebUI Pipe to send the secret header — done in installer (`AI_FACTORY_WEBHOOK_SECRET` + Pipe sends `X-AI-Factory-Secret`).
-- [ ] Confirm requests without the correct header are rejected.
+- [ ] Add shared-secret header check right after `01_Client_Intake` (n8n side — **next to build together**, nothing enforces this yet).
+- [x] Update the OpenWebUI Pipe to send the secret header — done and confirmed live (v1.0.4, secret in `.env`).
+- [ ] Confirm requests without the correct header are rejected (blocked on the item above).
 
 ## 1b — Time Awareness for Every Agent
 

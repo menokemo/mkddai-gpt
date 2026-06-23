@@ -360,7 +360,7 @@ cat > "$APP_DIR/docs/openwebui_ai_factory_pipe.py" <<'EOF'
 """
 title: AI Factory
 author: MKDD
-version: 1.0.3
+version: 1.0.4
 description: Send real user project requests from Open WebUI to n8n AI Factory workflow.
 requirements: requests
 """

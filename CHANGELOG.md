@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-06-23 (latest) — Live deployment confirmed: schema + webhook secret + Pipe v1.0.4
+
+- Re-ran the updated installer on the live server: `ai_design_variants` and `ai_token_usage` tables confirmed created.
+- Generated `AI_FACTORY_WEBHOOK_SECRET` and added it to the live `.env` (the installer's idempotent `.env` check doesn't add new vars to an existing file, so this needed a manual one-line append).
+- Fixed a `def init` -> `def __init__` typo found in the live Pipe (it was never actually being instantiated), bumped to v1.0.4, added `webhook_secret` + `X-AI-Factory-Secret` header. Confirmed deployed by the user.
+- Bumped the Pipe template version in `install_ai_factory_v3.sh` to match (1.0.4).
+- Still pending: the n8n-side IF node that actually checks this header — nothing rejects unauthenticated requests yet, see `CURRENT_STATUS.md` -> Current Risk.
+
 ## 2026-06-23 (latest) — Installer fully updated for everything except the n8n workflow itself
 
 - `.env` now generates `AI_FACTORY_WEBHOOK_SECRET`, printed at the end of installation and saved in `/opt/ai-factory/.env`.

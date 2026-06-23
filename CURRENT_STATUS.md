@@ -2,6 +2,9 @@
 
 ## Working (confirmed live via fresh export, 2026-06-23)
 
+- Updated installer re-run live on the server: `ai_design_variants` and `ai_token_usage` tables now exist in the live database (confirmed via `apply_schema.sh` output).
+- `AI_FACTORY_WEBHOOK_SECRET` generated and present in the live server's `.env`.
+- OpenWebUI Pipe updated live to v1.0.4: fixed a `def init` -> `def __init__` typo (the Pipe wasn't actually initializing before this), added `webhook_secret`, and sends it as the `X-AI-Factory-Secret` header on every request.
 - Docker stack running: PostgreSQL, n8n, Open WebUI, OpenHands, SearXNG (JSON format enabled), Redis.
 - `01_Client_Intake` (webhook) is connected to `00_AI_General_Manager` — confirmed live.
 - `00_AI_General_Manager` has all three inputs wired: Chat Model (OpenRouter), Memory (Postgres), and Tool (native SearXNG node) — confirmed live.
@@ -32,6 +35,7 @@ See `BUGS_AND_FIXES.md` for full detail.
 ## Current Risk
 
 - New Project and Continue Project paths are still not built (no agents attached yet for those intents — `01B_Intent_Analyzer` classifies them but nothing acts on the classification yet beyond passing through to the response).
+- Webhook security is only half done: the Pipe now *sends* the `X-AI-Factory-Secret` header, but n8n doesn't *check* it yet (no IF node built). Until that node is added, the webhook still accepts requests without the secret. To be built together, node by node.
 
 ## Latest Architectural Decision
 

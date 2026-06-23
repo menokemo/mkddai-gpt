@@ -69,3 +69,15 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Root cause**: Never specified in the original prompt.
 - **Fix**: Added a dedicated "اللغة" section to the system message: reply in whatever language the user starts with, and use Egyptian Arabic dialect specifically when the user writes in Arabic.
 - **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` and confirmed already live (per the latest export) — pending a live test to confirm dialect behavior in practice.
+
+### 2026-06-23 — `__init__` typo in the live Pipe (`def init` instead of `def __init__`)
+- **Bug**: The Pipe code running live on the server had `def init(self):` instead of `def __init__(self):`, meaning Python would never actually call it as a constructor — `self.webhook_url` (and now `self.webhook_secret`) would never get set, causing the Pipe to fail at runtime.
+- **Root cause**: Likely lost the double underscores during a manual copy/paste at some point.
+- **Fix**: Corrected to `def __init__(self):` while updating the Pipe to v1.0.4 (adding `webhook_secret` + the `X-AI-Factory-Secret` header).
+- **Status**: ✅ Fixed and deployed live — confirmed by the user.
+
+### 2026-06-23 — `.env` on the live server didn't have `AI_FACTORY_WEBHOOK_SECRET`
+- **Bug**: Re-running the updated installer on an existing install didn't add the new `AI_FACTORY_WEBHOOK_SECRET` line, since the installer only writes `.env` if it doesn't already exist. The final step that echoes the secret then failed with `unbound variable`.
+- **Root cause**: Idempotent `.env` creation logic doesn't add new variables to an existing file.
+- **Fix**: Manually appended the line with `echo "AI_FACTORY_WEBHOOK_SECRET=$(openssl rand -hex 24)" | sudo tee -a /opt/ai-factory/.env`.
+- **Status**: ✅ Done live — secret generated and confirmed present in `.env`.
