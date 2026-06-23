@@ -87,3 +87,9 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Root cause**: Recent n8n versions set `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` by default, blocking `$env` access from node expressions for security. Unblocking it is possible but explicitly discouraged by n8n's own docs for sensitive values like secrets.
 - **Fix**: Abandoned the custom IF node entirely. Used n8n's native Webhook node `Authentication: Header Auth` setting instead — built specifically for this use case, stores the secret as a credential (not in the workflow JSON), and rejects non-matching requests automatically with no extra nodes.
 - **Status**: ✅ Fixed and confirmed live — a real chat through Open WebUI got a normal reply, confirming the header check passes correctly.
+
+### 2026-06-23 — n8n's `$now` returns the wrong timezone (UTC-4 instead of Cairo time)
+- **Bug**: `$now` in n8n expressions returned a time offset by `-04:00`, about 6 hours behind the user's actual local time in Egypt, causing the General Manager to report the wrong current time.
+- **Root cause**: n8n had no explicit timezone configured, so it defaulted to the server/container's own timezone (likely the hosting provider's default region) instead of Cairo.
+- **Fix**: Added `GENERIC_TIMEZONE: "Africa/Cairo"` and `TZ: "Africa/Cairo"` to the n8n service's environment in `install_ai_factory_v3.sh`'s `docker-compose.yml`.
+- **Status**: ⏳ Fixed in the installer — pending live confirmation after re-applying and restarting the n8n container.

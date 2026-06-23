@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (latest) — n8n timezone fixed to Africa/Cairo
+
+- Added `GENERIC_TIMEZONE` and `TZ` env vars (set to `Africa/Cairo`) to the n8n service in `install_ai_factory_v3.sh`'s `docker-compose.yml`. Without this, `$now` was returning UTC-4 (~6 hours behind actual Cairo time), causing the General Manager to report the wrong current time despite the Time Awareness feature working correctly otherwise.
+- General Manager named **باجوش** confirmed live, introduces itself correctly.
+- Time Awareness confirmed partially working live: `01A_Time_Context` node and `$now` injection both work; only the timezone offset was wrong.
+
 ## 2026-06-23 (latest) — Webhook Security done via native Header Auth (Step 1 complete)
 
 - Pivoted away from the planned custom IF node + `$env` approach after hitting n8n's `N8N_BLOCK_ENV_ACCESS_IN_NODE` restriction (env access blocked in node expressions by default).
