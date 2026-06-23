@@ -119,6 +119,23 @@ OpenHands execution can take far longer than a webhook should stay open:
 - Track progress in `ai_agent_runs` / `ai_projects.status`.
 - When the user's next message is a check-in, the Continue Project path (Step 5) reports current status instead of making them wait on one long request.
 
+## Step 8b: Interactive Task List per Project
+
+Goal: give the client a real, live-updating todo list for their project — not just a static text summary.
+
+Data model already exists: `ai_tasks` (id, project_id, title, description, owner_agent, status, priority). Architect/PM/Execution steps populate and update rows here as the project progresses. What's missing is how the client actually *sees and interacts with* it. Two paths, try in this order:
+
+**Path A — Open WebUI's native Task Management feature (try first, free if it works)**
+Open WebUI has a built-in feature where an agentic model maintains a live checklist directly inside the chat, via two built-in tools (`create_tasks`, `update_task`). If our setup (Open WebUI -> Pipe -> n8n, not a direct native model connection) can trigger this, the client would see a real interactive checklist right inside their conversation with zero extra infrastructure. **Unconfirmed** — needs a live test, since this feature is documented for native function-calling model connections, and we go through a custom Pipe. Test before relying on it.
+
+**Path B — Dedicated webhook page (guaranteed fallback, same pattern as the Design Variants Gate)**
+If Path A doesn't work through the Pipe:
+- `GET /tasks/:project_id` webhook renders an HTML page listing that project's rows from `ai_tasks` as real checkboxes.
+- Checking a box calls a small `GET/POST /tasks/:task_id/complete` webhook that updates `status` in Postgres immediately.
+- The General Manager sends this page's link to the client whenever tasks are created/updated, same as the Presentation Page link pattern.
+
+Build Path B regardless of Path A's outcome — it's the dependable version and reuses an already-proven pattern.
+
 ## Step 9: QA / Revision Loop
 
 ```text

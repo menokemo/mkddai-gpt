@@ -70,6 +70,14 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Track progress in `ai_projects.status` / `ai_agent_runs`.
 - [ ] Continue Project path reports current status on check-in instead of making the user wait.
 
+## 8b — Interactive Task List per Project
+
+- [ ] **Path A (try first):** Test whether Open WebUI's native Task Management (`create_tasks`/`update_task`) works through our custom Pipe -> n8n setup, not just direct native model connections.
+- [ ] **Path B (guaranteed fallback, build regardless):**
+  - [ ] `GET /tasks/:project_id` webhook — renders `ai_tasks` rows as a real checkbox list.
+  - [ ] `GET/POST /tasks/:task_id/complete` webhook — updates `status` in Postgres on check.
+  - [ ] General Manager sends this link whenever tasks are created/updated.
+
 ## 9 — QA / Revision Loop
 
 - [ ] QA Agent — include No-AI-Fingerprint check (see `AGENTS.md`).
