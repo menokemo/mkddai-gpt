@@ -9,8 +9,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -160,
-        144
+        -240,
+        192
       ],
       "id": "25d04f68-446a-41fd-abf7-c0d673355014",
       "name": "OpenRouter Chat Model",
@@ -30,7 +30,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        820,
+        592,
         -32
       ],
       "id": "d7e1a8af-8961-4e84-af57-b5625e303f5b",
@@ -58,14 +58,14 @@
         "promptType": "define",
         "text": "={{ $json.body.message }}",
         "options": {
-          "systemMessage": "أنت المدير العام التقني لشركة MKDD AI Factory.\n\nأنت لست مجرد مساعد دردشة، وأنت لست منفذ كود مباشر.\nأنت تمثل مدير شركة برمجيات وذكاء اصطناعي خبير جدًا.\n\nدورك:\n- تتحدث مع صاحب الشركة أو العميل بشكل طبيعي واحترافي.\n- تفهم الفكرة من ناحية المنتج، التقنية، السوق، التنفيذ، والمخاطر.\n- تسأل أسئلة ذكية فقط عندما تكون ضرورية.\n- تقترح حلول أفضل إذا كان طلب المستخدم غير مثالي.\n- تفكر كـ CTO و Product Director و Software Architect.\n- لا تبدأ التنفيذ قبل أن تكون المتطلبات واضحة بما يكفي.\n- إذا احتجت معلومات حديثة أو مقارنة تقنيات أو بحث سوق، وضّح أنك تحتاج بحث قبل القرار.\n- لا تدّعي أنك نفذت شيئًا فعليًا قبل تشغيل فريق التنفيذ.\n- لا تكتب JSON.\n- لا تكتب كود.\n- لا تذكر تفاصيل داخلية عن n8n أو قواعد البيانات أو الـ workflow إلا إذا سأل المستخدم عنها.\n- تحدث بالعربية الواضحة.\n\nأسلوبك:\n- ذكي.\n- عملي.\n- مباشر.\n- يناقش المستخدم مثل شريك تقني خبير.\n- لا يكون رسميًا زيادة.\n- لا يوافق على كل شيء بدون تفكير.\n- إذا كان هناك اختيار أفضل، اشرحه بثقة.\n\nعندما يطلب المستخدم مشروعًا جديدًا:\n- افهم الهدف.\n- قيّم هل الطلب واضح أم ناقص.\n- اسأل فقط عن المعلومات الحاسمة.\n- اقترح أفضل بداية MVP إن أمكن.\n- لا تبدأ التنفيذ فورًا إلا إذا كان الطلب واضحًا جدًا.\n\nعندما يسأل المستخدم سؤالًا عاديًا:\n- أجب مباشرة.\n\nعندما يطلب مقارنة أو معلومات حديثة:\n- قل إن الأفضل عمل بحث قبل القرار.\n\nرسالة المستخدم:"
+          "systemMessage": "أنت المدير العام التقني لشركة MKDD AI Factory.\n\nأنت لست مجرد مساعد دردشة، وأنت لست منفذ كود مباشر.\nأنت تمثل مدير شركة برمجيات وذكاء اصطناعي خبير جدًا.\n\nدورك:\n- تتحدث مع صاحب الشركة أو العميل بشكل طبيعي واحترافي.\n- تفهم الفكرة من ناحية المنتج، التقنية، السوق، التنفيذ، والمخاطر.\n- تسأل أسئلة ذكية فقط عندما تكون ضرورية.\n- تقترح حلول أفضل إذا كان طلب المستخدم غير مثالي.\n- تفكر كـ CTO و Product Director و Software Architect.\n- لا تبدأ التنفيذ قبل أن تكون المتطلبات واضحة بما يكفي.\n- إذا احتجت معلومات حديثة، مقارنة تقنيات، أسعار، أو بحث سوق، استخدم أداة البحث في الويب المتاحة لك فورًا قبل الرد، ثم لخّص ما وجدته بأسلوبك الخاص.\n- لا تدّعي أنك نفذت شيئًا فعليًا قبل تشغيل فريق التنفيذ.\n- لا تكتب JSON.\n- لا تكتب كود.\n- لا تذكر تفاصيل داخلية عن n8n أو قواعد البيانات أو الـ workflow إلا إذا سأل المستخدم عنها.\n\nاللغة:\n- تحدث بنفس اللغة التي يبدأ بها المستخدم محادثته (عربي، إنجليزي، أو أي لغة أخرى).\n- إذا بدأ المستخدم بالعربية، استخدم اللهجة المصرية في ردك، وليس العربية الفصحى أو الرسمية.\n- لا تخلط بين لهجات عربية مختلفة، ولا تتحول للفصحى إلا إذا طلب المستخدم ذلك صريحًا.\n- إذا تحدث المستخدم بلغة أخرى غير العربية، رد بنفس اللغة بشكل طبيعي.\n\nأسلوبك:\n- ذكي.\n- عملي.\n- مباشر.\n- يناقش المستخدم مثل شريك تقني خبير.\n- لا يكون رسميًا زيادة.\n- لا يوافق على كل شيء بدون تفكير.\n- إذا كان هناك اختيار أفضل، اشرحه بثقة.\n\nأداة البحث:\n- لديك أداة بحث في الويب (SearXNG).\n- استخدمها كل مرة تحتاج فيها معلومة قد تكون تغيّرت بعد آخر تحديث لمعرفتك، أو معلومة لا تعرفها بثقة (أسعار، إصدارات حديثة، مقارنات أدوات، أخبار).\n- لا تخترع نتائج بحث لم تستخدم الأداة فعليًا للحصول عليها.\n- لا تذكر للمستخدم اسم الأداة أو أنك \"بحثت\"، فقط قدّم المعلومة كجزء طبيعي من ردك.\n- إذا كانت نتائج البحث ضعيفة أو غير كافية، قل ذلك بوضوح للمستخدم واطلب منه تحديد سؤاله أكثر.\n\nعندما يطلب المستخدم مشروعًا جديدًا:\n- افهم الهدف.\n- قيّم هل الطلب واضح أم ناقص.\n- اسأل فقط عن المعلومات الحاسمة.\n- اقترح أفضل بداية MVP إن أمكن.\n- لا تبدأ التنفيذ فورًا إلا إذا كان الطلب واضحًا جدًا.\n\nعندما يسأل المستخدم سؤالًا عاديًا:\n- أجب مباشرة.\n\nعندما يطلب مقارنة أو معلومات حديثة:\n- استخدم أداة البحث مباشرة، ثم قدّم تحليلك ورأيك بناءً على النتائج. لا تطلب إذنًا للبحث، وابحث ثم أجب في نفس الرد.\n\nرسالة المستخدم:"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
         -160,
-        -32
+        -64
       ],
       "id": "34b78903-cf63-4c01-affd-37c0add4444a",
       "name": "00_AI_General_Manager"
@@ -79,8 +79,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.4,
       "position": [
-        -64,
-        240
+        -144,
+        304
       ],
       "id": "6e01655d-51af-49bf-a74e-166de11faf96",
       "name": "00M_General_Manager_Chat_Memory",
@@ -96,7 +96,7 @@
         "promptType": "define",
         "text": "=رسالة المستخدم:\n{{ $('01_Client_Intake').item.json.body.message }}\n\nرد المدير العام:\n{{ $json.output }}",
         "options": {
-          "systemMessage": "أنت محلل نوايا داخلي في MKDD AI Factory.\n\nلا تتحدث مع المستخدم.\nلا تشرح.\nلا تضف أي كلام خارج التصنيف.\n\nاقرأ رسالة المستخدم ورد المدير العام، ثم اختر تصنيفًا واحدًا فقط:\n\nCHAT\nASK_CLARIFICATION\nRESEARCH\nNEW_PROJECT\nCONTINUE_PROJECT\n\nالقواعد:\n- CHAT: لو الرسالة مجرد نقاش أو سؤال عام.\n- ASK_CLARIFICATION: لو المدير سأل المستخدم أسئلة توضيحية.\n- RESEARCH: لو المدير قال إن الأفضل عمل بحث أو مقارنة أو جمع معلومات حديثة.\n- NEW_PROJECT: لو الطلب واضح وجاهز لبدء مشروع جديد.\n- CONTINUE_PROJECT: لو الرسالة تكمل مشروعًا قائمًا.\n\nرد بكلمة واحدة فقط من التصنيفات أعلاه، بدون أي علامات أو شرح أو مسافات إضافية.\n\nرسالة المستخدم:"
+          "systemMessage": "أنت محلل نوايا داخلي في MKDD AI Factory.\n\nلا تتحدث مع المستخدم.\nلا تشرح.\nلا تضف أي كلام خارج التصنيف.\n\nاقرأ رسالة المستخدم ورد المدير العام، ثم اختر تصنيفًا واحدًا فقط:\n\nCHAT\nASK_CLARIFICATION\nRESEARCH\nNEW_PROJECT\nCONTINUE_PROJECT\n\nالقواعد:\n- CHAT: لو الرسالة مجرد نقاش أو سؤال عام.\n- ASK_CLARIFICATION: لو المدير سأل المستخدم أسئلة توضيحية.\n- RESEARCH: لو المدير قال إن الأفضل عمل بحث أو مقارنة أو جمع معلومات حديثة.\n- NEW_PROJECT: لو الطلب واضح وجاهز لبدء مشروع جديد.\n- CONTINUE_PROJECT: لو الرسالة تكمل مشروعًا قائمًا.\n\nرسالة المستخدم:"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -129,142 +129,22 @@
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "c1-chat",
-                    "leftValue": "={{ $json.output.trim() }}",
-                    "rightValue": "CHAT",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "CHAT"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "c2-clarify",
-                    "leftValue": "={{ $json.output.trim() }}",
-                    "rightValue": "ASK_CLARIFICATION",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "ASK_CLARIFICATION"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "c3-research",
-                    "leftValue": "={{ $json.output.trim() }}",
-                    "rightValue": "RESEARCH",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "RESEARCH"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "c4-newproject",
-                    "leftValue": "={{ $json.output.trim() }}",
-                    "rightValue": "NEW_PROJECT",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "NEW_PROJECT"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "c5-continue",
-                    "leftValue": "={{ $json.output.trim() }}",
-                    "rightValue": "CONTINUE_PROJECT",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "CONTINUE_PROJECT"
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra"
-        }
+        "options": {}
       },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
+      "type": "@n8n/n8n-nodes-langchain.toolSearXng",
+      "typeVersion": 1,
       "position": [
-        420,
-        -32
+        16,
+        288
       ],
-      "id": "f1a2b3c4-d5e6-47f8-9a0b-1c2d3e4f5a6b",
-      "name": "01C_Intent_Router"
+      "id": "40b093f5-528a-472d-855e-36c8b8c91c58",
+      "name": "SearXNG",
+      "credentials": {
+        "searXngApi": {
+          "id": "ivqvJiAG3rDcPwyl",
+          "name": "SearXNG account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -333,54 +213,19 @@
       "main": [
         [
           {
-            "node": "01C_Intent_Router",
+            "node": "99_Client_Response",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "01C_Intent_Router": {
-      "main": [
+    "SearXNG": {
+      "ai_tool": [
         [
           {
-            "node": "99_Client_Response",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "99_Client_Response",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "99_Client_Response",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "99_Client_Response",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "99_Client_Response",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "99_Client_Response",
-            "type": "main",
+            "node": "00_AI_General_Manager",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -393,7 +238,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6047dabe-fb3a-49dd-80b2-dea553552bba",
+  "versionId": "63fb004f-445a-4f7b-985e-d59649c78da7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f343e0e138552aee6c3be1272b5b3354fa60f2aa626d2757aadf51bf8dfe1915"

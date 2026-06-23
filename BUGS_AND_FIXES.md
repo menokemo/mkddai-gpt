@@ -32,19 +32,19 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Bug**: Postgres Chat Memory session key was hardcoded to `mkddai-main-chat`. This means every user/chat shares the exact same memory, instead of each chat having its own.
 - **Root cause**: A temporary fixed value was used during early testing and was never replaced with a dynamic one.
 - **Fix**: Changed the Session Key field on the `00M_General_Manager_Chat_Memory` node to `={{ $json.body.chat_id }}`, reading the real `chat_id` sent by the OpenWebUI Pipe through the webhook body.
-- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` — pending confirmation after re-import/test in the live n8n instance.
+- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` — re-applied on 2026-06-23 after a fresh live export confirmed this fix had not actually been applied in the n8n instance yet. Still pending live confirmation after re-import/test.
 
 ### 2026-06-23 — Webhook not connected to General Manager
 - **Bug**: In the exported workflow, `01_Client_Intake` (the webhook trigger) had an empty `main` connection — it was not wired to `00_AI_General_Manager` at all. If this was the live version, no real request from Open WebUI would ever reach the General Manager.
 - **Root cause**: Likely a manual rewiring in the n8n editor (e.g. while adding the Intent Analyzer) that accidentally dropped the original trigger connection, or testing was done by manually triggering nodes inside the editor rather than through the real webhook end-to-end, so the break went unnoticed.
 - **Fix**: Reconnected `01_Client_Intake -> 00_AI_General_Manager` in `workflows/ai-factory-v3.json`.
-- **Status**: ✅ Confirmed — screenshot of the live n8n editor (2026-06-23) shows `01_Client_Intake` is in fact connected to `00_AI_General_Manager` in production; the disconnection only existed in the stale exported file, not the live workflow. File fix kept anyway for correctness.
+- **Status**: ✅ Confirmed — both a screenshot of the live n8n editor and a fresh workflow export (2026-06-23) show `01_Client_Intake` connected to `00_AI_General_Manager` in production; the disconnection only existed in the original stale exported file, not the live workflow.
 
 ### 2026-06-23 — Intent Analyzer missing the original user message
 - **Bug**: `01B_Intent_Analyzer`'s prompt only received `{{ $json.output }}` (the General Manager's reply). Its own system message instructs it to read both the user's message *and* the manager's reply, but the user's message was never actually passed in.
 - **Root cause**: The node's `text` parameter referenced only the previous node's output field, not the original webhook input.
 - **Fix**: Updated the prompt to include both: `{{ $('01_Client_Intake').item.json.body.message }}` (original user message) and `{{ $json.output }}` (General Manager's reply).
-- **Status**: ⏳ Fixed in file — pending confirmation after re-import/test.
+- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` — re-applied on 2026-06-23 after a fresh live export confirmed this fix had not actually been applied in the n8n instance yet. Still pending live confirmation after re-import/test.
 
 ### 2026-06-23 — SearXNG JSON format disabled by default, blocking the Research tool
 - **Bug**: SearXNG ships with `format: json` disabled by default. Without it, the SearXNG n8n tool node (and any HTTP call asking for `format=json`) fails or returns HTML instead of structured data, which is required for the General Manager's web-search tool to work.
@@ -57,3 +57,15 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Root cause**: The file is owned by `root` (created either by the root-run installer or by the SearXNG container itself), and the logged-in user (`mkddai`) had no write access.
 - **Fix**: Use `sudo nano ...` to edit. Now that the installer pre-creates the file with the right content (see fix above), this manual edit usually isn't needed at all for new installs.
 - **Status**: ✅ Resolved (workaround confirmed working on the live server; root cause avoided going forward by the installer fix).
+
+### 2026-06-23 — General Manager told to *announce* needing search instead of actually searching
+- **Bug**: The original system message instructed the General Manager to say "it would be better to search first" instead of actually using a search tool — a leftover instruction from before any search tool existed.
+- **Root cause**: The prompt was never updated after the SearXNG Tool was attached to the agent; it still described the old behavior (deferring to research instead of acting).
+- **Fix**: Updated the system message so the General Manager uses its web-search Tool immediately when needed and answers in the same reply, instead of asking permission or stalling.
+- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` and confirmed already live (per the latest export) — pending one more live test specifically confirming search results show up correctly in a real reply.
+
+### 2026-06-23 — No instruction for matching the user's language/dialect
+- **Bug**: The General Manager had no explicit rule for which language or Arabic dialect to reply in, risking inconsistent (e.g. Modern Standard Arabic instead of Egyptian) or mismatched-language replies.
+- **Root cause**: Never specified in the original prompt.
+- **Fix**: Added a dedicated "اللغة" section to the system message: reply in whatever language the user starts with, and use Egyptian Arabic dialect specifically when the user writes in Arabic.
+- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` and confirmed already live (per the latest export) — pending a live test to confirm dialect behavior in practice.

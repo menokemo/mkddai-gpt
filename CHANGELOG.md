@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-06-23 (latest) — System message rewrite + workflow sync
+
+- Rewrote `00_AI_General_Manager`'s system message:
+  - Now instructs it to actually use the SearXNG search Tool immediately when needed, instead of just announcing that research would be needed (leftover instruction from before the Tool existed).
+  - Added a dedicated language section: reply in whatever language the user starts with; use Egyptian Arabic dialect specifically for Arabic.
+- Synced `workflows/ai-factory-v3.json` with a fresh live export, which confirmed:
+  - SearXNG Tool is live and attached to `00_AI_General_Manager`.
+  - Webhook connection and updated system message are live.
+  - The dynamic `chat_id` session key and the Intent Analyzer's original-message fix were **not** actually applied live yet — re-applied in this commit.
+
 ## 2026-06-23 (later still) — Installer fix + Research tool via native SearXNG node
 
 - Fixed `install_ai_factory_v3.sh`: now pre-creates `searxng/settings.yml` with `json` format enabled before first boot, so the Research tool works out of the box on fresh installs (no manual edit needed).

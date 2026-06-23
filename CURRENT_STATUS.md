@@ -1,46 +1,38 @@
 # Current Status
 
-## Working
+## Working (confirmed live via fresh export, 2026-06-23)
 
-- Docker stack is running.
-- PostgreSQL is running.
-- n8n is running.
-- Open WebUI is running.
-- OpenHands is running.
-- SearXNG is running, with JSON output format enabled (confirmed via live `curl` test).
-- Redis is running.
-- `00_AI_General_Manager` is working, confirmed connected end-to-end from the real webhook (`01_Client_Intake -> 00_AI_General_Manager`) in the live n8n instance.
-- Postgres Chat Memory is working.
-- OpenWebUI Pipe v1.0.3 filters internal helper prompts.
-- Memory pollution from OpenWebUI title/tags/followups was diagnosed and fixed.
-- `01B_Intent_Analyzer` exists in the live workflow. Classifies into: `CHAT`, `ASK_CLARIFICATION`, `RESEARCH`, `NEW_PROJECT`, `CONTINUE_PROJECT`.
-- **Web search is now attached directly as a Tool on `00_AI_General_Manager`** using n8n's native SearXNG tool node — see `DECISIONS_LOG.md`. The General Manager decides on its own when to search instead of going through a separate Research Agent branch.
+- Docker stack running: PostgreSQL, n8n, Open WebUI, OpenHands, SearXNG (JSON format enabled), Redis.
+- `01_Client_Intake` (webhook) is connected to `00_AI_General_Manager` — confirmed live.
+- `00_AI_General_Manager` has all three inputs wired: Chat Model (OpenRouter), Memory (Postgres), and Tool (native SearXNG node) — confirmed live.
+- System message updated and live: General Manager now actually calls the search Tool when needed (instead of just saying research is needed), and has explicit language rules (match user's language; Egyptian dialect for Arabic).
+- `01B_Intent_Analyzer` exists, classifies into `CHAT` / `ASK_CLARIFICATION` / `RESEARCH` / `NEW_PROJECT` / `CONTINUE_PROJECT`.
+- OpenWebUI Pipe v1.0.3 filters internal helper prompts; memory pollution issue fixed.
 
-## Current Workflow Shape (live, confirmed by screenshot)
+## Current Workflow Shape (live)
 
 ```text
 01_Client_Intake (webhook)
-  -> 00_AI_General_Manager  (has: Chat Model, Memory, and Tool = SearXNG search)
+  -> 00_AI_General_Manager  (Chat Model + Memory + Tool: SearXNG search)
   -> 01B_Intent_Analyzer
   -> 99_Client_Response
 ```
 
-## Important note on `workflows/ai-factory-v3.json` in this repo
+No Switch/Router and no separate Research Agent — web search is handled directly by the General Manager as a Tool call. This design choice is documented in `DECISIONS_LOG.md`.
 
-The committed JSON file still contains an earlier draft design (`01C_Intent_Router` Switch + separate `02B_Research_Agent` branch). That design was **superseded** by the simpler Tool-on-General-Manager approach described above. The file needs a fresh export from the live n8n instance to stay accurate — do this next time a workflow change is exported.
+## Pending — fixed in file, NOT yet confirmed live
 
-## Pending Confirmation
+A fresh export on 2026-06-23 showed these two fixes from earlier had not actually been applied in the live n8n instance (only in the committed file). They have been **re-applied** in `workflows/ai-factory-v3.json` — please re-import and confirm:
 
-1. Memory session key dynamic `chat_id` — fixed in file, needs live confirmation it's applied in the live workflow too.
-2. `01B_Intent_Analyzer` receiving the original user message — fixed in file, needs live confirmation.
+1. Memory session key still hardcoded to `mkddai-main-chat` in production — needs to change to `{{ $json.body.chat_id }}`.
+2. `01B_Intent_Analyzer` still only receiving the General Manager's reply, not the original user message — needs the combined prompt.
 
-See `BUGS_AND_FIXES.md` for full detail on each.
+See `BUGS_AND_FIXES.md` for full detail.
 
 ## Current Risk
 
-- `workflows/ai-factory-v3.json` in the repo is out of sync with the live workflow (see note above) — re-export needed.
-- New Project and Continue Project paths are still not built (no agents attached yet for those intents).
+- New Project and Continue Project paths are still not built (no agents attached yet for those intents — `01B_Intent_Analyzer` classifies them but nothing acts on the classification yet beyond passing through to the response).
 
 ## Latest Architectural Decision
 
-Do not turn General Manager into a parser for routing — but it *can* and does call tools directly (like web search) when it judges it needs to, without breaking its conversational role. Routing/classification for project workflows still happens in `01B_Intent_Analyzer` after it.
+The General Manager stays conversational but can call tools directly (web search) when it judges it needs to. Routing/classification for project workflows still happens in `01B_Intent_Analyzer` after it, but research is no longer a separate routed path.
