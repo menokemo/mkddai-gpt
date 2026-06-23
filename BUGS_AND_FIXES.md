@@ -81,3 +81,9 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Root cause**: Idempotent `.env` creation logic doesn't add new variables to an existing file.
 - **Fix**: Manually appended the line with `echo "AI_FACTORY_WEBHOOK_SECRET=$(openssl rand -hex 24)" | sudo tee -a /opt/ai-factory/.env`.
 - **Status**: ✅ Done live — secret generated and confirmed present in `.env`.
+
+### 2026-06-23 — `$env` blocked in node expressions ("access to env vars denied")
+- **Bug**: Tried to read `AI_FACTORY_WEBHOOK_SECRET` via `{{ $env.AI_FACTORY_WEBHOOK_SECRET }}` inside a custom IF node. n8n returned `[access to env vars denied]`.
+- **Root cause**: Recent n8n versions set `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` by default, blocking `$env` access from node expressions for security. Unblocking it is possible but explicitly discouraged by n8n's own docs for sensitive values like secrets.
+- **Fix**: Abandoned the custom IF node entirely. Used n8n's native Webhook node `Authentication: Header Auth` setting instead — built specifically for this use case, stores the secret as a credential (not in the workflow JSON), and rejects non-matching requests automatically with no extra nodes.
+- **Status**: ✅ Fixed and confirmed live — a real chat through Open WebUI got a normal reply, confirming the header check passes correctly.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-06-23 (latest) — Webhook Security done via native Header Auth (Step 1 complete)
+
+- Pivoted away from the planned custom IF node + `$env` approach after hitting n8n's `N8N_BLOCK_ENV_ACCESS_IN_NODE` restriction (env access blocked in node expressions by default).
+- Used n8n's built-in Webhook node `Authentication: Header Auth` instead — `01_Client_Intake` now rejects any request missing/mismatching the `X-AI-Factory-Secret` header automatically, with zero extra nodes and the secret stored as a credential rather than in the workflow JSON.
+- Confirmed live: a real chat through Open WebUI got a normal reply.
+- Note: the `AI_FACTORY_WEBHOOK_SECRET` env var passed to the n8n container (added in an earlier commit) is no longer needed for this approach but is harmless to leave in place.
+- Step 1 is now fully done — see `TODO.md` / `NEXT_STEPS.md`.
+
 ## 2026-06-23 (latest) — Live deployment confirmed: schema + webhook secret + Pipe v1.0.4
 
 - Re-ran the updated installer on the live server: `ai_design_variants` and `ai_token_usage` tables confirmed created.

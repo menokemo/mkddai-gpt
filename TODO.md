@@ -8,11 +8,11 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Confirm dynamic memory session key (`chat_id`) is live and isolates memory per chat.
 - [ ] Confirm `01B_Intent_Analyzer` receives the original user message correctly.
 
-## 1 — Webhook Security
+## 1 — Webhook Security ✅ DONE, confirmed live
 
-- [ ] Add shared-secret header check right after `01_Client_Intake` (n8n side — **next to build together**, nothing enforces this yet).
-- [x] Update the OpenWebUI Pipe to send the secret header — done and confirmed live (v1.0.4, secret in `.env`).
-- [ ] Confirm requests without the correct header are rejected (blocked on the item above).
+- [x] `01_Client_Intake`'s Authentication set to Header Auth (Name: `X-AI-Factory-Secret`, Value: the generated secret) — native n8n feature, no IF node needed.
+- [x] OpenWebUI Pipe sends the secret header — done and confirmed live (v1.0.5).
+- [x] Confirmed requests with the correct header go through normally (n8n rejects ones without it automatically).
 
 ## 1b — Time Awareness for Every Agent
 

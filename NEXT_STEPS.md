@@ -9,12 +9,17 @@ Ordered plan for the rest of the n8n workflow. Each step assumes the ones before
 - Dynamic memory session key (`chat_id`) and Intent Analyzer's original-message fix: re-applied in `workflows/ai-factory-v3.json`, pending live re-import + confirmation.
 - Decision: web search lives as a Tool on the General Manager, not a separate Research Agent + Switch branch (see `DECISIONS_LOG.md`).
 
-## Step 1: Webhook Security
+## Step 1: Webhook Security — DONE, confirmed live
 
-Add a simple shared-secret check right after `01_Client_Intake`:
-- The OpenWebUI Pipe sends a custom header (e.g. `X-AI-Factory-Secret`).
-- An `IF` node checks the header against the expected value (stored in n8n credentials/env, not hardcoded).
-- If it doesn't match, route to a node that responds with an error and stops, instead of continuing to the General Manager.
+Implemented using n8n's **native Webhook node authentication** — no IF node, no `$env`, no extra nodes at all:
+- `01_Client_Intake`'s own `Authentication` parameter set to **Header Auth**.
+- A Header Auth credential created with Name = `X-AI-Factory-Secret`, Value = the generated `AI_FACTORY_WEBHOOK_SECRET`.
+- The OpenWebUI Pipe (v1.0.5) sends this header on every request.
+- n8n itself rejects (401) any request missing or mismatching this header, before the workflow even runs.
+
+This replaced the originally planned approach (a custom IF node reading `$env.AI_FACTORY_WEBHOOK_SECRET`), which hit a wall: recent n8n versions block `$env` access in node expressions by default (`N8N_BLOCK_ENV_ACCESS_IN_NODE=true`), and unblocking it is explicitly discouraged for sensitive values — n8n's own docs recommend using credentials instead, which is exactly what Header Auth already does natively. See `DECISIONS_LOG.md`.
+
+Confirmed live: a chat through Open WebUI got a normal reply (meaning the header matched and n8n let the request through).
 
 ## Step 1b: Time Awareness for Every Agent (every turn, not just session start)
 
