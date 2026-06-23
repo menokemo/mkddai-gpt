@@ -88,8 +88,8 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Fix**: Abandoned the custom IF node entirely. Used n8n's native Webhook node `Authentication: Header Auth` setting instead — built specifically for this use case, stores the secret as a credential (not in the workflow JSON), and rejects non-matching requests automatically with no extra nodes.
 - **Status**: ✅ Fixed and confirmed live — a real chat through Open WebUI got a normal reply, confirming the header check passes correctly.
 
-### 2026-06-23 — n8n's `$now` returns the wrong timezone (UTC-4 instead of Cairo time)
-- **Bug**: `$now` in n8n expressions returned a time offset by `-04:00`, about 6 hours behind the user's actual local time in Egypt, causing the General Manager to report the wrong current time.
-- **Root cause**: n8n had no explicit timezone configured, so it defaulted to the server/container's own timezone (likely the hosting provider's default region) instead of Cairo.
-- **Fix**: Added `GENERIC_TIMEZONE: "Africa/Cairo"` and `TZ: "Africa/Cairo"` to the n8n service's environment in `install_ai_factory_v3.sh`'s `docker-compose.yml`.
+### 2026-06-23 — n8n's `$now` returns the wrong timezone (UTC-4 instead of the team's real timezone)
+- **Bug**: `$now` in n8n expressions returned a time offset by `-04:00`, several hours off from the team's actual local time, causing the General Manager to report the wrong current time.
+- **Root cause**: n8n had no explicit timezone configured, so it defaulted to the server/container's own timezone (likely the hosting provider's default region — the server is physically hosted in the Netherlands, but that didn't determine the timezone n8n was using either).
+- **Fix**: Added `GENERIC_TIMEZONE: "Europe/Amsterdam"` and `TZ: "Europe/Amsterdam"` to the n8n service's environment in `install_ai_factory_v3.sh`'s `docker-compose.yml`.
 - **Status**: ⏳ Fixed in the installer — pending live confirmation after re-applying and restarting the n8n container.

@@ -307,8 +307,8 @@ services:
       SEARXNG_BASE_URL: ${SEARXNG_BASE_URL}
       AI_FACTORY_WEBHOOK_SECRET: ${AI_FACTORY_WEBHOOK_SECRET}
       N8N_AI_ENABLED: "true"
-      GENERIC_TIMEZONE: "Africa/Cairo"
-      TZ: "Africa/Cairo"
+      GENERIC_TIMEZONE: "Europe/Amsterdam"
+      TZ: "Europe/Amsterdam"
     volumes:
       - ./n8n:/home/node/.n8n
     depends_on:

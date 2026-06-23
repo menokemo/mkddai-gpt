@@ -1,8 +1,8 @@
 # Changelog
 
-## 2026-06-23 (latest) — n8n timezone fixed to Africa/Cairo
+## 2026-06-23 (latest) — n8n timezone fixed to Europe/Amsterdam
 
-- Added `GENERIC_TIMEZONE` and `TZ` env vars (set to `Africa/Cairo`) to the n8n service in `install_ai_factory_v3.sh`'s `docker-compose.yml`. Without this, `$now` was returning UTC-4 (~6 hours behind actual Cairo time), causing the General Manager to report the wrong current time despite the Time Awareness feature working correctly otherwise.
+- Added `GENERIC_TIMEZONE` and `TZ` env vars (set to `Europe/Amsterdam`, matching the team's chosen timezone) to the n8n service in `install_ai_factory_v3.sh`'s `docker-compose.yml`. Without this, `$now` was returning UTC-4, several hours off, causing the General Manager to report the wrong current time despite the Time Awareness feature working correctly otherwise.
 - General Manager named **باجوش** confirmed live, introduces itself correctly.
 - Time Awareness confirmed partially working live: `01A_Time_Context` node and `$now` injection both work; only the timezone offset was wrong.
 
