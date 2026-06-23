@@ -10,8 +10,8 @@
 - `01_Client_Intake` (webhook) is connected to `00_AI_General_Manager` — confirmed live.
 - `00_AI_General_Manager` has all three inputs wired: Chat Model (OpenRouter), Memory (Postgres), and Tool (native SearXNG node) — confirmed live.
 - System message updated and live: General Manager (named **باجوش**, introduces itself by this name when asked) now actually calls the search Tool when needed (instead of just saying research is needed), and has explicit language rules (match user's language; Egyptian dialect for Arabic).
-- Time Awareness fully confirmed live: `01A_Time_Context` node + `$now`, with timezone fixed to `Europe/Amsterdam` (was defaulting to UTC-4, causing wrong reported times).
-- Conversation-history search Tool added on `00_AI_General_Manager` (Postgres, reads `n8n_chat_histories` for the current `chat_id`, `LIMIT 20`) — lets it answer "when did we discuss X" questions on demand without loading full history every turn. See `DECISIONS_LOG.md` for the cost rationale.
+- Time Awareness fully confirmed live: `01A_Time_Context` node + `$now`, with timezone fixed to `Europe/Amsterdam` (was defaulting to UTC-4, causing wrong reported times). Confirmed: knows current time and the gap since the user's last message.
+- Conversation-history search Tool added on `00_AI_General_Manager` (Postgres, reads `n8n_chat_histories` for the current `chat_id`) — works for recent messages, but is limited to the last 20 (fixed `LIMIT`/`DESC`), so it can't answer "when did I first say X" once a conversation passes 20 messages. **Paused/deferred** by team decision — see `BUGS_AND_FIXES.md` for the next-step fix (two separate fixed-config tools) if revisited.
 - `01B_Intent_Analyzer` exists, classifies into `CHAT` / `ASK_CLARIFICATION` / `RESEARCH` / `NEW_PROJECT` / `CONTINUE_PROJECT`.
 - OpenWebUI Pipe v1.0.3 filters internal helper prompts; memory pollution issue fixed.
 
