@@ -305,6 +305,7 @@ services:
       WEBHOOK_URL: http://localhost:5678/
       OPENHANDS_BASE_URL: ${OPENHANDS_BASE_URL}
       SEARXNG_BASE_URL: ${SEARXNG_BASE_URL}
+      AI_FACTORY_WEBHOOK_SECRET: ${AI_FACTORY_WEBHOOK_SECRET}
       N8N_AI_ENABLED: "true"
     volumes:
       - ./n8n:/home/node/.n8n
