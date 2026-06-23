@@ -14,11 +14,12 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [x] OpenWebUI Pipe sends the secret header — done and confirmed live (v1.0.5).
 - [x] Confirmed requests with the correct header go through normally (n8n rejects ones without it automatically).
 
-## 1b — Time Awareness for Every Agent
+## 1b — Time Awareness for Every Agent ✅ DONE, confirmed live
 
-- [ ] Re-run `scripts/apply_schema.sh` on the live server to add `created_at` to `n8n_chat_histories`.
-- [ ] Add `01A_Time_Context` Postgres node after `01_Client_Intake`, running on every message (not just session start), fetching the last message's `created_at` for this `chat_id`.
-- [ ] Update every agent's system message to include current time + last-message time (see `AGENTS.md` -> Time Awareness Policy).
+- [x] `created_at` added to `n8n_chat_histories` and applied on the live server.
+- [x] `01A_Time_Context` Postgres node built, runs on every message, feeds `00_AI_General_Manager`.
+- [x] System message updated with `$now` + last-message time; timezone fixed to `Europe/Amsterdam`. Confirmed: correct current time and correct gap-since-last-message in live testing.
+- [x] Bonus: conversation-history search Tool added (works for recent messages; deep "first message" search paused, see `BUGS_AND_FIXES.md`).
 
 ## 2 — Error Handling
 
