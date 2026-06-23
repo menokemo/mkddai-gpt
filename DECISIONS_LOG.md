@@ -27,3 +27,11 @@ OpenWebUI sends internal prompts for titles, tags, and followups. The Pipe must 
 ## Decision: GitHub is the source of truth
 
 Docs, scripts, decisions, current state, and next steps should be kept in GitHub.
+
+## Decision: Web search is a Tool on the General Manager, not a separate pipeline branch
+
+The General Manager (`00_AI_General_Manager`) has n8n's native **SearXNG** tool node attached directly to its `ai_tool` input. The model decides itself when to search and what to search for (via n8n's `$fromAI`-style tool calling), rather than routing through a fixed Intent Analyzer -> Switch -> Research Agent pipeline. This is simpler, has fewer nodes, and matches how a real agent should behave (deciding on its own when a tool is needed) instead of a rigid sequential step. The earlier draft of a separate Research Agent + Switch branch was abandoned in favor of this.
+
+## Decision: SearXNG JSON output must be enabled at install time
+
+The installer pre-creates `searxng/settings.yml` with `format: json` enabled before the stack starts, instead of relying on SearXNG's own defaults (which disable JSON). This was required for any tool/HTTP call expecting structured search results to work without a manual server-side edit after install.

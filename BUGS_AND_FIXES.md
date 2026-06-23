@@ -38,10 +38,22 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Bug**: In the exported workflow, `01_Client_Intake` (the webhook trigger) had an empty `main` connection — it was not wired to `00_AI_General_Manager` at all. If this was the live version, no real request from Open WebUI would ever reach the General Manager.
 - **Root cause**: Likely a manual rewiring in the n8n editor (e.g. while adding the Intent Analyzer) that accidentally dropped the original trigger connection, or testing was done by manually triggering nodes inside the editor rather than through the real webhook end-to-end, so the break went unnoticed.
 - **Fix**: Reconnected `01_Client_Intake -> 00_AI_General_Manager` in `workflows/ai-factory-v3.json`.
-- **Status**: ⏳ Fixed in file — pending confirmation after re-import/test (always test end-to-end via the real webhook URL, not just inside the editor, to catch this kind of break early).
+- **Status**: ✅ Confirmed — screenshot of the live n8n editor (2026-06-23) shows `01_Client_Intake` is in fact connected to `00_AI_General_Manager` in production; the disconnection only existed in the stale exported file, not the live workflow. File fix kept anyway for correctness.
 
 ### 2026-06-23 — Intent Analyzer missing the original user message
 - **Bug**: `01B_Intent_Analyzer`'s prompt only received `{{ $json.output }}` (the General Manager's reply). Its own system message instructs it to read both the user's message *and* the manager's reply, but the user's message was never actually passed in.
 - **Root cause**: The node's `text` parameter referenced only the previous node's output field, not the original webhook input.
 - **Fix**: Updated the prompt to include both: `{{ $('01_Client_Intake').item.json.body.message }}` (original user message) and `{{ $json.output }}` (General Manager's reply).
 - **Status**: ⏳ Fixed in file — pending confirmation after re-import/test.
+
+### 2026-06-23 — SearXNG JSON format disabled by default, blocking the Research tool
+- **Bug**: SearXNG ships with `format: json` disabled by default. Without it, the SearXNG n8n tool node (and any HTTP call asking for `format=json`) fails or returns HTML instead of structured data, which is required for the General Manager's web-search tool to work.
+- **Root cause**: The installer (`install_ai_factory_v3.sh`) let SearXNG auto-generate its own `settings.yml` on first boot using its built-in defaults, which never enable the `json` format.
+- **Fix**: Installer now pre-creates `/opt/ai-factory/searxng/settings.yml` itself (with `search.formats: [html, json]` and a generated `secret_key`) *before* `docker compose up`, so JSON is enabled from the very first run — no manual edit needed anymore for new installs.
+- **Status**: ✅ Fixed in `install_ai_factory_v3.sh`. Confirmed manually on the live server (manual `settings.yml` edit + container restart) that `format=json` works once enabled — verified with a live `curl` test returning structured results.
+
+### 2026-06-23 — Manual edit of settings.yml fails with Permission denied
+- **Bug**: Running `nano /opt/ai-factory/searxng/settings.yml` as a non-root user failed to save with a permission error.
+- **Root cause**: The file is owned by `root` (created either by the root-run installer or by the SearXNG container itself), and the logged-in user (`mkddai`) had no write access.
+- **Fix**: Use `sudo nano ...` to edit. Now that the installer pre-creates the file with the right content (see fix above), this manual edit usually isn't needed at all for new installs.
+- **Status**: ✅ Resolved (workaround confirmed working on the live server; root cause avoided going forward by the installer fix).

@@ -177,6 +177,21 @@ echo "Schema applied."
 EOF
 chmod +x "$APP_DIR/scripts/apply_schema.sh"
 
+if [[ ! -f "$APP_DIR/searxng/settings.yml" ]]; then
+cat > "$APP_DIR/searxng/settings.yml" <<EOF
+# Read the documentation before extending the defaults:
+# https://docs.searxng.org/admin/settings/
+use_default_settings: true
+server:
+  secret_key: "$(openssl rand -hex 16)"
+  image_proxy: true
+search:
+  formats:
+    - html
+    - json
+EOF
+fi
+
 cat > "$APP_DIR/docker-compose.yml" <<'EOF'
 services:
   postgres:

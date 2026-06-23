@@ -34,12 +34,12 @@ Open WebUI  -> n8n Webhook -> 00_AI_General_Manager -> Intent Analyzer / Router
 | Core Docker stack | PostgreSQL, Redis, SearXNG, n8n, Open WebUI, OpenHands all running. |
 | Dynamic memory session key | Changed from fixed `mkddai-main-chat` to `{{ $json.body.chat_id }}` so each chat gets isolated memory. Pending live confirmation — see `BUGS_AND_FIXES.md`. |
 | Intent Analyzer (`01B_Intent_Analyzer`) | Classifies into `CHAT` / `ASK_CLARIFICATION` / `RESEARCH` / `NEW_PROJECT` / `CONTINUE_PROJECT`. Fixed to receive the real user message, not just the GM's reply. |
-| Switch Router (`01C_Intent_Router`) | Routes by Intent Analyzer label. All branches currently placeholder until specialized agents are attached. |
+| Switch Router (`01C_Intent_Router`) | Drafted in `workflows/ai-factory-v3.json` but **superseded** — see Rejected table. Not part of the live design. |
+| Web search Tool on General Manager | n8n native SearXNG tool node attached to `00_AI_General_Manager`'s `ai_tool` input. Model decides when to search. Installer now enables SearXNG JSON format automatically. |
 
 ### ⏳ Planned / not built yet
 | Feature | Idea | Why / Reasoning | Status |
 |---|---|---|---|
-| Research path | Intent Analyzer → Research Agent → General Manager response, using SearXNG | Lets the system answer research questions with real search | Not built — `01C_Intent_Router`'s RESEARCH branch is a placeholder |
 | New Project path | Save Project → PM Agent → Product Analyst → Architect | Core flow for handling new software project requests | Not built |
 | GitHub Manager | Node/agent that manages reading/writing project repos | Needed before OpenHands execution can happen on real repos | Not built |
 | OpenHands Executor integration | Wire n8n execution briefs into OpenHands | Actual code-writing step of the pipeline | Not built |
@@ -52,6 +52,7 @@ Open WebUI  -> n8n Webhook -> 00_AI_General_Manager -> Intent Analyzer / Router
 |---|---|
 | LiteLLM as model gateway | Removed from the final stack — n8n and OpenHands now call OpenRouter directly, which is simpler and removes an unnecessary layer. |
 | n8n Code / Function / Python / JS nodes | Decided against using custom code nodes inside n8n — logic and routing should be handled by AI Agent nodes instead, to keep the workflow auditable and consistent. |
+| Separate Research Agent + Switch branch for web search | Drafted in `workflows/ai-factory-v3.json` (`01C_Intent_Router` -> `02A_SearXNG_Search` -> `02B_Research_Agent`), but replaced by attaching SearXNG directly as a Tool on `00_AI_General_Manager`. Fewer nodes, less to keep in sync, and lets the model decide when search is actually needed instead of a fixed pipeline step. |
 
 ## Full planned AI employee roster
 

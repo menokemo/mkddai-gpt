@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (later still) — Installer fix + Research tool via native SearXNG node
+
+- Fixed `install_ai_factory_v3.sh`: now pre-creates `searxng/settings.yml` with `json` format enabled before first boot, so the Research tool works out of the box on fresh installs (no manual edit needed).
+- Decision: General Manager's web-search capability is implemented as a **Tool** attached directly to `00_AI_General_Manager` (using n8n's native **SearXNG** tool node, not a generic HTTP Request Tool and not the separate Research Agent + Switch branch that was drafted earlier). This lets the model decide itself when and how to search, instead of a fixed pipeline step.
+- Confirmed live: webhook `01_Client_Intake -> 00_AI_General_Manager` connection exists and works in production (the disconnection found earlier only affected a stale exported file, not the live workflow).
+
 ## 2026-06-23 (later) — n8n workflow fixes
 
 - Exported workflow `ai-factory-v3.json` reviewed and committed to `workflows/` for the first time (GitHub now versions the actual n8n workflow, not just docs).

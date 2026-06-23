@@ -7,41 +7,40 @@
 - n8n is running.
 - Open WebUI is running.
 - OpenHands is running.
-- SearXNG is running.
+- SearXNG is running, with JSON output format enabled (confirmed via live `curl` test).
 - Redis is running.
-- `00_AI_General_Manager` is working.
+- `00_AI_General_Manager` is working, confirmed connected end-to-end from the real webhook (`01_Client_Intake -> 00_AI_General_Manager`) in the live n8n instance.
 - Postgres Chat Memory is working.
 - OpenWebUI Pipe v1.0.3 filters internal helper prompts.
 - Memory pollution from OpenWebUI title/tags/followups was diagnosed and fixed.
-- `01B_Intent_Analyzer` exists (this is the node previously referred to as `02_Intent_Analyzer` in earlier planning docs — same role, different name in the real workflow). Classifies into: `CHAT`, `ASK_CLARIFICATION`, `RESEARCH`, `NEW_PROJECT`, `CONTINUE_PROJECT`.
-- `01C_Intent_Router` (Switch node) added after the Intent Analyzer — routes by classification label.
+- `01B_Intent_Analyzer` exists in the live workflow. Classifies into: `CHAT`, `ASK_CLARIFICATION`, `RESEARCH`, `NEW_PROJECT`, `CONTINUE_PROJECT`.
+- **Web search is now attached directly as a Tool on `00_AI_General_Manager`** using n8n's native SearXNG tool node — see `DECISIONS_LOG.md`. The General Manager decides on its own when to search instead of going through a separate Research Agent branch.
 
-## Current Workflow Shape
+## Current Workflow Shape (live, confirmed by screenshot)
 
 ```text
 01_Client_Intake (webhook)
-  -> 00_AI_General_Manager
+  -> 00_AI_General_Manager  (has: Chat Model, Memory, and Tool = SearXNG search)
   -> 01B_Intent_Analyzer
-  -> 01C_Intent_Router (Switch: CHAT / ASK_CLARIFICATION / RESEARCH / NEW_PROJECT / CONTINUE_PROJECT)
-  -> 99_Client_Response  (all branches currently point here as a placeholder)
+  -> 99_Client_Response
 ```
 
-The actual exported workflow is versioned at `workflows/ai-factory-v3.json` in this repo.
+## Important note on `workflows/ai-factory-v3.json` in this repo
 
-## Pending Confirmation (just fixed, not yet verified live)
+The committed JSON file still contains an earlier draft design (`01C_Intent_Router` Switch + separate `02B_Research_Agent` branch). That design was **superseded** by the simpler Tool-on-General-Manager approach described above. The file needs a fresh export from the live n8n instance to stay accurate — do this next time a workflow change is exported.
 
-These were fixed in `workflows/ai-factory-v3.json` on 2026-06-23 but need to be re-imported into the live n8n instance and tested end-to-end via the real webhook before being marked fully Fixed:
+## Pending Confirmation
 
-1. Webhook `01_Client_Intake` was disconnected from `00_AI_General_Manager` — reconnected.
-2. Memory session key changed from fixed `mkddai-main-chat` to dynamic `{{ $json.body.chat_id }}`.
-3. `01B_Intent_Analyzer` now receives the original user message, not just the General Manager's reply.
+1. Memory session key dynamic `chat_id` — fixed in file, needs live confirmation it's applied in the live workflow too.
+2. `01B_Intent_Analyzer` receiving the original user message — fixed in file, needs live confirmation.
 
 See `BUGS_AND_FIXES.md` for full detail on each.
 
 ## Current Risk
 
-- The 5 branches of `01C_Intent_Router` all currently route to the same placeholder response (`99_Client_Response`). The real specialized paths (Research via SearXNG, New Project via PM Agent/Product Analyst/Architect, etc.) are not built yet.
+- `workflows/ai-factory-v3.json` in the repo is out of sync with the live workflow (see note above) — re-export needed.
+- New Project and Continue Project paths are still not built (no agents attached yet for those intents).
 
 ## Latest Architectural Decision
 
-Do not turn General Manager into a parser. Keep it conversational. Put classification/routing in hidden nodes after it (`01B_Intent_Analyzer` + `01C_Intent_Router`).
+Do not turn General Manager into a parser for routing — but it *can* and does call tools directly (like web search) when it judges it needs to, without breaking its conversational role. Routing/classification for project workflows still happens in `01B_Intent_Analyzer` after it.
