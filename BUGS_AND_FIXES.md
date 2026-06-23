@@ -28,8 +28,20 @@ This file tracks every bug found during development of MKDD AI Factory, its root
   - `Suggest 3-5 relevant follow-up`
 - **Status**: ✅ Fixed and confirmed — General Manager now remembers user-provided context correctly after the fix.
 
-### Open — Shared/fixed memory session key
-- **Bug**: Postgres Chat Memory session key is hardcoded to `mkddai-main-chat`. This means every user/chat shares the exact same memory, instead of each chat having its own.
+### 2026-06-23 — Shared/fixed memory session key
+- **Bug**: Postgres Chat Memory session key was hardcoded to `mkddai-main-chat`. This means every user/chat shares the exact same memory, instead of each chat having its own.
 - **Root cause**: A temporary fixed value was used during early testing and was never replaced with a dynamic one.
-- **Planned fix**: Change the Session Key field on the `Postgres Chat Memory` node (connected to `00_AI_General_Manager`) from `mkddai-main-chat` to `{{ $json.chat_id }}`, and confirm the OpenWebUI Pipe actually sends `chat_id` in its payload.
-- **Status**: ❌ Open — top priority item, see `NEXT_STEPS.md` Step 1.
+- **Fix**: Changed the Session Key field on the `00M_General_Manager_Chat_Memory` node to `={{ $json.body.chat_id }}`, reading the real `chat_id` sent by the OpenWebUI Pipe through the webhook body.
+- **Status**: ⏳ Fixed in `workflows/ai-factory-v3.json` — pending confirmation after re-import/test in the live n8n instance.
+
+### 2026-06-23 — Webhook not connected to General Manager
+- **Bug**: In the exported workflow, `01_Client_Intake` (the webhook trigger) had an empty `main` connection — it was not wired to `00_AI_General_Manager` at all. If this was the live version, no real request from Open WebUI would ever reach the General Manager.
+- **Root cause**: Likely a manual rewiring in the n8n editor (e.g. while adding the Intent Analyzer) that accidentally dropped the original trigger connection, or testing was done by manually triggering nodes inside the editor rather than through the real webhook end-to-end, so the break went unnoticed.
+- **Fix**: Reconnected `01_Client_Intake -> 00_AI_General_Manager` in `workflows/ai-factory-v3.json`.
+- **Status**: ⏳ Fixed in file — pending confirmation after re-import/test (always test end-to-end via the real webhook URL, not just inside the editor, to catch this kind of break early).
+
+### 2026-06-23 — Intent Analyzer missing the original user message
+- **Bug**: `01B_Intent_Analyzer`'s prompt only received `{{ $json.output }}` (the General Manager's reply). Its own system message instructs it to read both the user's message *and* the manager's reply, but the user's message was never actually passed in.
+- **Root cause**: The node's `text` parameter referenced only the previous node's output field, not the original webhook input.
+- **Fix**: Updated the prompt to include both: `{{ $('01_Client_Intake').item.json.body.message }}` (original user message) and `{{ $json.output }}` (General Manager's reply).
+- **Status**: ⏳ Fixed in file — pending confirmation after re-import/test.

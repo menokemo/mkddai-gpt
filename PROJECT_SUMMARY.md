@@ -32,14 +32,14 @@ Open WebUI  -> n8n Webhook -> 00_AI_General_Manager -> Intent Analyzer / Router
 | OpenWebUI Pipe internal-prompt filtering (v1.0.3) | Fixes memory pollution from title/tag/follow-up system prompts — see `BUGS_AND_FIXES.md`. |
 | Automatic PostgreSQL table creation | Installer (`install_ai_factory_v3.sh`) creates all required tables on setup. |
 | Core Docker stack | PostgreSQL, Redis, SearXNG, n8n, Open WebUI, OpenHands all running. |
+| Dynamic memory session key | Changed from fixed `mkddai-main-chat` to `{{ $json.body.chat_id }}` so each chat gets isolated memory. Pending live confirmation — see `BUGS_AND_FIXES.md`. |
+| Intent Analyzer (`01B_Intent_Analyzer`) | Classifies into `CHAT` / `ASK_CLARIFICATION` / `RESEARCH` / `NEW_PROJECT` / `CONTINUE_PROJECT`. Fixed to receive the real user message, not just the GM's reply. |
+| Switch Router (`01C_Intent_Router`) | Routes by Intent Analyzer label. All branches currently placeholder until specialized agents are attached. |
 
 ### ⏳ Planned / not built yet
 | Feature | Idea | Why / Reasoning | Status |
 |---|---|---|---|
-| Dynamic memory session key | Use real OpenWebUI `chat_id` (`{{ $json.chat_id }}`) instead of fixed `mkddai-main-chat` | Each chat/user needs isolated memory instead of sharing one | Not built — top priority |
-| `02_Intent_Analyzer` | Hidden node after the General Manager that classifies intent: `CHAT`, `PROJECT`, `RESEARCH`, `TECH_SUPPORT`, `BUSINESS`, `CONTINUE_PROJECT` | Keeps the General Manager purely conversational; routing logic lives separately | Not built |
-| Switch Router | Routes the conversation based on Intent Analyzer output | Needed to direct traffic to the right specialized path | Not built |
-| Research path | Intent Analyzer → Research Agent → General Manager response, using SearXNG | Lets the system answer research questions with real search | Not built |
+| Research path | Intent Analyzer → Research Agent → General Manager response, using SearXNG | Lets the system answer research questions with real search | Not built — `01C_Intent_Router`'s RESEARCH branch is a placeholder |
 | New Project path | Save Project → PM Agent → Product Analyst → Architect | Core flow for handling new software project requests | Not built |
 | GitHub Manager | Node/agent that manages reading/writing project repos | Needed before OpenHands execution can happen on real repos | Not built |
 | OpenHands Executor integration | Wire n8n execution briefs into OpenHands | Actual code-writing step of the pipeline | Not built |

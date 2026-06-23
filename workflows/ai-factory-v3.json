@@ -1,0 +1,404 @@
+{
+  "name": "ai-factory-v3",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        144
+      ],
+      "id": "25d04f68-446a-41fd-abf7-c0d673355014",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "HJvFXJXA2ZyhNaff",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $('00_AI_General_Manager').item.json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        820,
+        -32
+      ],
+      "id": "d7e1a8af-8961-4e84-af57-b5625e303f5b",
+      "name": "99_Client_Response"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-factory-v3",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "1bc204bf-91ff-449b-b91e-4d9e3d0b1f4b",
+      "name": "01_Client_Intake",
+      "webhookId": "87d8c144-95e2-4980-bbf2-3918f95c4113"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "أنت المدير العام التقني لشركة MKDD AI Factory.\n\nأنت لست مجرد مساعد دردشة، وأنت لست منفذ كود مباشر.\nأنت تمثل مدير شركة برمجيات وذكاء اصطناعي خبير جدًا.\n\nدورك:\n- تتحدث مع صاحب الشركة أو العميل بشكل طبيعي واحترافي.\n- تفهم الفكرة من ناحية المنتج، التقنية، السوق، التنفيذ، والمخاطر.\n- تسأل أسئلة ذكية فقط عندما تكون ضرورية.\n- تقترح حلول أفضل إذا كان طلب المستخدم غير مثالي.\n- تفكر كـ CTO و Product Director و Software Architect.\n- لا تبدأ التنفيذ قبل أن تكون المتطلبات واضحة بما يكفي.\n- إذا احتجت معلومات حديثة أو مقارنة تقنيات أو بحث سوق، وضّح أنك تحتاج بحث قبل القرار.\n- لا تدّعي أنك نفذت شيئًا فعليًا قبل تشغيل فريق التنفيذ.\n- لا تكتب JSON.\n- لا تكتب كود.\n- لا تذكر تفاصيل داخلية عن n8n أو قواعد البيانات أو الـ workflow إلا إذا سأل المستخدم عنها.\n- تحدث بالعربية الواضحة.\n\nأسلوبك:\n- ذكي.\n- عملي.\n- مباشر.\n- يناقش المستخدم مثل شريك تقني خبير.\n- لا يكون رسميًا زيادة.\n- لا يوافق على كل شيء بدون تفكير.\n- إذا كان هناك اختيار أفضل، اشرحه بثقة.\n\nعندما يطلب المستخدم مشروعًا جديدًا:\n- افهم الهدف.\n- قيّم هل الطلب واضح أم ناقص.\n- اسأل فقط عن المعلومات الحاسمة.\n- اقترح أفضل بداية MVP إن أمكن.\n- لا تبدأ التنفيذ فورًا إلا إذا كان الطلب واضحًا جدًا.\n\nعندما يسأل المستخدم سؤالًا عاديًا:\n- أجب مباشرة.\n\nعندما يطلب مقارنة أو معلومات حديثة:\n- قل إن الأفضل عمل بحث قبل القرار.\n\nرسالة المستخدم:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "34b78903-cf63-4c01-affd-37c0add4444a",
+      "name": "00_AI_General_Manager"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.chat_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        240
+      ],
+      "id": "6e01655d-51af-49bf-a74e-166de11faf96",
+      "name": "00M_General_Manager_Chat_Memory",
+      "credentials": {
+        "postgres": {
+          "id": "0PEhmDzcG7ipDc5E",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=رسالة المستخدم:\n{{ $('01_Client_Intake').item.json.body.message }}\n\nرد المدير العام:\n{{ $json.output }}",
+        "options": {
+          "systemMessage": "أنت محلل نوايا داخلي في MKDD AI Factory.\n\nلا تتحدث مع المستخدم.\nلا تشرح.\nلا تضف أي كلام خارج التصنيف.\n\nاقرأ رسالة المستخدم ورد المدير العام، ثم اختر تصنيفًا واحدًا فقط:\n\nCHAT\nASK_CLARIFICATION\nRESEARCH\nNEW_PROJECT\nCONTINUE_PROJECT\n\nالقواعد:\n- CHAT: لو الرسالة مجرد نقاش أو سؤال عام.\n- ASK_CLARIFICATION: لو المدير سأل المستخدم أسئلة توضيحية.\n- RESEARCH: لو المدير قال إن الأفضل عمل بحث أو مقارنة أو جمع معلومات حديثة.\n- NEW_PROJECT: لو الطلب واضح وجاهز لبدء مشروع جديد.\n- CONTINUE_PROJECT: لو الرسالة تكمل مشروعًا قائمًا.\n\nرد بكلمة واحدة فقط من التصنيفات أعلاه، بدون أي علامات أو شرح أو مسافات إضافية.\n\nرسالة المستخدم:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        -32
+      ],
+      "id": "eaac55e8-c81f-49e3-b6d9-688d59019b73",
+      "name": "01B_Intent_Analyzer"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        176,
+        160
+      ],
+      "id": "48005d78-4b9b-495a-99c3-095d2f8f1bfd",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "HJvFXJXA2ZyhNaff",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c1-chat",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "CHAT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CHAT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c2-clarify",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "ASK_CLARIFICATION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ASK_CLARIFICATION"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c3-research",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "RESEARCH",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RESEARCH"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c4-newproject",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "NEW_PROJECT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NEW_PROJECT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c5-continue",
+                    "leftValue": "={{ $json.output.trim() }}",
+                    "rightValue": "CONTINUE_PROJECT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CONTINUE_PROJECT"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        420,
+        -32
+      ],
+      "id": "f1a2b3c4-d5e6-47f8-9a0b-1c2d3e4f5a6b",
+      "name": "01C_Intent_Router"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "00_AI_General_Manager",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "99_Client_Response": {
+      "main": [
+        []
+      ]
+    },
+    "01_Client_Intake": {
+      "main": [
+        [
+          {
+            "node": "00_AI_General_Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00_AI_General_Manager": {
+      "main": [
+        [
+          {
+            "node": "01B_Intent_Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00M_General_Manager_Chat_Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "00_AI_General_Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "01B_Intent_Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01B_Intent_Analyzer": {
+      "main": [
+        [
+          {
+            "node": "01C_Intent_Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01C_Intent_Router": {
+      "main": [
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99_Client_Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6047dabe-fb3a-49dd-80b2-dea553552bba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f343e0e138552aee6c3be1272b5b3354fa60f2aa626d2757aadf51bf8dfe1915"
+  },
+  "nodeGroups": [],
+  "id": "jH3iGAewFsIXDFjY",
+  "tags": []
+}
