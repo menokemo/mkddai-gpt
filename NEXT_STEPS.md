@@ -1,69 +1,105 @@
 # Next Steps
 
-## Step 0 (done — was Step 1): Fix Session Key, Connection, and Intent Analyzer Input
+Ordered plan for the rest of the n8n workflow. Each step assumes the ones before it are done. See `TODO.md` for the flat checklist version of this same plan.
 
-Fixed on 2026-06-23 in `workflows/ai-factory-v3.json`:
-- Session key on `00M_General_Manager_Chat_Memory` changed to `{{ $json.body.chat_id }}`.
-- Reconnected `01_Client_Intake -> 00_AI_General_Manager`.
-- `01B_Intent_Analyzer` now receives the original user message + the General Manager's reply.
+## Done so far
 
-Action needed: re-import this workflow into the live n8n instance and confirm via a real webhook call (not just inside the editor) that:
-- the General Manager responds end-to-end through the webhook,
-- each chat_id gets isolated memory,
-- the Intent Analyzer classifies correctly.
+- Webhook -> General Manager (Chat Model + Memory + SearXNG Tool) -> Intent Analyzer -> Response. Confirmed live.
+- General Manager's system message rewritten: actually calls the search tool, matches user's language (Egyptian dialect for Arabic).
+- Dynamic memory session key (`chat_id`) and Intent Analyzer's original-message fix: re-applied in `workflows/ai-factory-v3.json`, pending live re-import + confirmation.
+- Decision: web search lives as a Tool on the General Manager, not a separate Research Agent + Switch branch (see `DECISIONS_LOG.md`).
 
-Once confirmed, mark these as ✅ Fixed in `BUGS_AND_FIXES.md`.
+## Step 1: Webhook Security
 
-## Step 1 (done — was "Build Intent Analyzer"): `01B_Intent_Analyzer`
+Add a simple shared-secret check right after `01_Client_Intake`:
+- The OpenWebUI Pipe sends a custom header (e.g. `X-AI-Factory-Secret`).
+- An `IF` node checks the header against the expected value (stored in n8n credentials/env, not hardcoded).
+- If it doesn't match, route to a node that responds with an error and stops, instead of continuing to the General Manager.
 
-Already built (named `01B_Intent_Analyzer`, not `02_Intent_Analyzer` as originally planned — same role). Labels in use:
+## Step 2: Error Handling
 
-```text
-CHAT
-ASK_CLARIFICATION
-RESEARCH
-NEW_PROJECT
-CONTINUE_PROJECT
-```
+Build a dedicated n8n **Error Workflow** and attach it to `ai-factory-v3` (Workflow Settings -> Error Workflow):
+- Catches failures from any node (OpenRouter timeout, bad API response, etc.).
+- Sends a fallback response back to the user instead of leaving the webhook hanging.
+- Logs the failure into `ai_agent_runs` (status = `failed`) for visibility.
 
-## Step 2 (done — skeleton only): `01C_Intent_Router` Switch
+Do this before adding more agents, so every new branch is covered by it automatically.
 
-Added after the Intent Analyzer. All 5 branches currently route to `99_Client_Response` as a placeholder — no specialized agent is attached to any branch yet.
+## Step 3: Real Intent Router (Switch)
 
-## Step 3: Research Path
-
-If `RESEARCH`:
-
-```text
-01C_Intent_Router (RESEARCH) -> Research Agent (uses SearXNG) -> General Manager Response -> 99_Client_Response
-```
+Add the actual `01C_Intent_Router` Switch node (not a placeholder) after `01B_Intent_Analyzer`:
+- `CHAT` / `ASK_CLARIFICATION` -> straight to `99_Client_Response` (General Manager already answered).
+- `NEW_PROJECT` -> Step 4.
+- `CONTINUE_PROJECT` -> Step 5.
 
 ## Step 4: New Project Path
 
-If `NEW_PROJECT`:
-
 ```text
-01C_Intent_Router (NEW_PROJECT) -> Save Project (ai_projects table) -> PM Agent -> Product Analyst -> Architect -> 99_Client_Response
+01C_Intent_Router (NEW_PROJECT)
+  -> Save Project (Postgres insert into ai_projects)
+  -> PM Agent (AI Agent: own Model; no memory needed)
+  -> Product Analyst Agent (AI Agent: own Model; SearXNG Tool shared if it needs market research)
+  -> Architect Agent (AI Agent: own Model)
+  -> Security Reviewer Agent (AI Agent: own Model) -- reviews the Architect's plan before anything is built
+  -> Save Project Memory (Postgres insert/update into ai_project_memory)
+  -> 99_Client_Response (summary back to the user)
 ```
 
 ## Step 5: Continue Project Path
 
-If `CONTINUE_PROJECT`: load existing project context from `ai_projects`/`ai_project_memory` and resume the relevant agent.
+```text
+01C_Intent_Router (CONTINUE_PROJECT)
+  -> Get Project (Postgres: look up ai_projects + ai_project_memory by chat_id)
+  -> Switch (route to whichever stage the project's `status` says it's at)
+  -> 99_Client_Response
+```
 
-## Step 6: Execution Path
+## Step 6: Confirmation Gate Before Execution
 
-Later:
+After Step 4 produces a plan (and before anything is ever written to GitHub/OpenHands), add an explicit confirmation step:
+- Respond to the user with the plan and ask "should I start building this?"
+- Only proceed to Step 7 once the next user message confirms (handled by `01B_Intent_Analyzer`/Continue Project path recognizing a confirmation reply).
+
+This prevents executing on a misunderstood request.
+
+## Step 7: Execution Path
 
 ```text
-GitHub Manager -> OpenHands Executor -> QA -> Delivery
+Execution Brief Builder (AI Agent: own Model) -- includes the No-AI-Fingerprint instructions, see AGENTS.md
+  -> GitHub node (native GitHub node: create/update repo, branch, commit)
+  -> HTTP Request -> OpenHands API (execution brief)
+  -> Save Agent Run (Postgres insert into ai_agent_runs)
 ```
 
-## Step 7: Keep Docs Updated
+## Step 8: Handle Long-Running Execution (Async)
 
-Run:
+OpenHands execution can take far longer than a webhook should stay open:
+- Respond to the user immediately after Step 7 kicks off ("started building, will update you").
+- Track progress in `ai_agent_runs` / `ai_projects.status`.
+- When the user's next message is a check-in, the Continue Project path (Step 5) reports current status instead of making them wait on one long request.
 
-```bash
-./sync_docs.sh
+## Step 9: QA / Revision Loop
+
+```text
+QA Agent (AI Agent: own Model) -- includes the No-AI-Fingerprint check, see AGENTS.md
+  -> Switch (PASS / FAIL)
+       PASS -> Step 10
+       FAIL -> Revision Agent (AI Agent: own Model) -> back to Step 7's GitHub/OpenHands step with a correction brief
+  -> Save QA Report (Postgres insert into ai_qa_reports)
 ```
 
-after replacing or editing project documentation locally. Always update `BUGS_AND_FIXES.md`, `CHANGELOG.md`, and `PROJECT_SUMMARY.md` for every change.
+## Step 10: Delivery
+
+```text
+Delivery Agent (AI Agent: own Model) -- final No-AI-Fingerprint pass, see AGENTS.md
+  -> Update Project Memory (Postgres update ai_project_memory / ai_projects.status = done)
+  -> 99_Client_Response (final friendly summary to the user)
+```
+
+## Step 11: Memory Agent (cross-cutting)
+
+Once Steps 4-10 work manually (each step saving its own Postgres record), consider adding a dedicated Memory Agent that standardizes how summaries get written into `ai_project_memory`, instead of every phase doing its own ad-hoc Postgres write. Lower priority — only worth it once the manual version proves repetitive.
+
+## Always
+
+Keep `BUGS_AND_FIXES.md`, `CHANGELOG.md`, and `PROJECT_SUMMARY.md` updated for every change made in any of the steps above.
