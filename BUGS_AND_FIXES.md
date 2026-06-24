@@ -98,3 +98,8 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Bug**: The Postgres Tool built to let the General Manager answer "when did we discuss X" questions only retrieves the most recent 20 messages (`Sort: DESC`, `Limit: 20`). Once a conversation passes 20 messages, the first message (and any early "when did I say X" target) falls outside what the tool returns, so it can't be found even though the tool runs successfully.
 - **Attempted fix**: Tried driving `Sort Direction` and `Limit` via `$fromAI(...)` so the model could choose ascending/descending and how many rows itself. Did not work — n8n's Sort Rule fields don't reliably support AI-driven values the way query parameters do.
 - **Status**: ⏸️ Paused/deferred by team decision — not worth the complexity right now. Documented next fix if revisited: split into two separate Postgres Tools with fixed configs (one `ASC LIMIT 5` for "first message" questions, one `DESC LIMIT 20` for "recent message" questions), both attached to the General Manager, each with its own clear description so the model picks the right one based on the question's intent.
+
+### 2026-06-23 — No error handling, failures left the webhook hanging silently
+- **Bug**: Any node failure (OpenRouter timeout, bad response, etc.) anywhere in `ai-factory-v3` left no record and no visibility — just an opaque n8n error response to the caller.
+- **Fix**: Built a separate workflow `00_Error_Handler` (Error Trigger -> Postgres Insert into `ai_agent_runs`), attached as `ai-factory-v3`'s Error Workflow in its settings.
+- **Status**: ✅ Fixed and confirmed live — a failure was logged successfully into `ai_agent_runs`.

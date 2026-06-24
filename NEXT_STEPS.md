@@ -39,12 +39,24 @@ ORDER BY id DESC LIMIT 1
 
 Every agent's system message includes the same two facts (current real time + this last-message timestamp) so the model reasons from real numbers instead of guessing. See `AGENTS.md` -> Time Awareness Policy. The model decides what counts as a "long" or "short" gap itself — no hardcoded threshold.
 
-## Step 2: Error Handling
+## Step 2: Error Handling — DONE, confirmed live
 
-Build a dedicated n8n **Error Workflow** and attach it to `ai-factory-v3` (Workflow Settings -> Error Workflow):
-- Catches failures from any node (OpenRouter timeout, bad API response, etc.).
-- Sends a fallback response back to the user instead of leaving the webhook hanging.
-- Logs the failure into `ai_agent_runs` (status = `failed`) for visibility.
+Built as a separate dedicated workflow `00_Error_Handler` (a normal node-by-node addition couldn't catch arbitrary failures mid-chain, since execution stops the instant a node fails — only a real **Error Trigger** node, in its own workflow, catches that):
+
+```text
+00_Error_Handler:
+  Error Trigger -> Postgres "Insert rows in a table" -> ai_agent_runs
+    agent_name: "00_Error_Handler"
+    input_summary: {{ $json.workflow.name }}
+    output_summary: {{ $json.execution.error.message }}
+    status: "failed"
+```
+
+Attached to `ai-factory-v3` via its own Workflow Settings -> Error Workflow -> `00_Error_Handler`. Confirmed live: failures get logged into `ai_agent_runs`.
+
+**Known limitation, by design**: this workflow runs *after* the failed execution already ended (n8n already returned its own error response to the caller), so it cannot return a friendly fallback reply to the same request. That part — a friendly error message instead of a raw n8n error — would need per-node "Continue Using Error Output" settings on individual nodes, which was deliberately not done now (too much manual upkeep per node at this stage). Revisit if a polished error reply becomes important.
+
+Pairs naturally with Telegram notifications (Step 14a) later — the Error Workflow is the natural place to add a Telegram alert node once Telegram is set up.
 
 Do this before adding more agents, so every new branch is covered by it automatically.
 

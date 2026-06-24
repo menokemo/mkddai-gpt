@@ -21,12 +21,12 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [x] System message updated with `$now` + last-message time; timezone fixed to `Europe/Amsterdam`. Confirmed: correct current time and correct gap-since-last-message in live testing.
 - [x] Bonus: conversation-history search Tool added (works for recent messages; deep "first message" search paused, see `BUGS_AND_FIXES.md`).
 
-## 2 — Error Handling
+## 2 — Error Handling ✅ DONE, confirmed live
 
-- [ ] Build a dedicated n8n Error Workflow.
-- [ ] Attach it as the Error Workflow for `ai-factory-v3` in Workflow Settings.
-- [ ] Make it respond to the user with a fallback message instead of leaving the webhook hanging.
-- [ ] Make it log failures into `ai_agent_runs`.
+- [x] Build a dedicated n8n Error Workflow (`00_Error_Handler`: Error Trigger -> Postgres Insert).
+- [x] Attach it as the Error Workflow for `ai-factory-v3` in Workflow Settings.
+- [ ] ~~Respond to the user with a fallback message~~ — not possible from a separate Error Workflow (execution already ended); deferred, see `NEXT_STEPS.md` Step 2.
+- [x] Log failures into `ai_agent_runs` — confirmed live.
 
 ## 3 — Real Intent Router
 

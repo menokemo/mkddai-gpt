@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-23 (latest) — Error Handling done (Step 2 complete)
+
+- Built `00_Error_Handler` workflow: Error Trigger -> Postgres Insert into `ai_agent_runs` (agent_name, workflow name, error message, status=failed).
+- Attached as `ai-factory-v3`'s Error Workflow.
+- Confirmed live: a failure got logged correctly.
+- Known limitation (deliberate, documented): can't return a friendly fallback reply to the original request from a separate Error Workflow, since execution already ended by the time it runs. Deferred.
+
 ## 2026-06-23 (latest) — Conversation-history search Tool + Time Awareness confirmed live
 
 - Added a Postgres-backed Tool to `00_AI_General_Manager` (same pattern as SearXNG): queries `n8n_chat_histories` for the current `chat_id`, sorted newest-first, `LIMIT 20`. Lets it answer "when did we discuss X" questions on demand.
