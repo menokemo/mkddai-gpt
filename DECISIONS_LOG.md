@@ -82,3 +82,11 @@ This was built immediately rather than deferred, since the cost profile (rare + 
 ## Decision: Telegram is for the owner, not a multi-client feature (for now)
 
 MKDD currently has a single owner/user, not multiple external clients talking to the system. Telegram integration is scoped accordingly: push notifications to the owner (solving the Async Execution waiting problem) and a faster mobile entry point for the owner specifically, not a general "notify the client" feature. If/when real external clients are onboarded later, this would need revisiting (e.g. per-client bot or chat mapping), but that's out of scope until there's an actual client.
+
+## Decision: General Manager hands off to the team via structured output + explicit confirmation, not the full chat history
+
+Building the team agents (PM/Product Analyst/Architect/Security Reviewer) live exposed two problems: PM Agent only saw the user's single latest message (losing earlier context and باجوش's own opinions from the discussion), and there was no node left to summarize anything once باجوش's own turn ended.
+
+Rejected: passing the full conversation history into PM Agent's prompt — works, but costs more tokens and adds noise from back-and-forth that isn't relevant to the final brief.
+
+Adopted: `00_AI_General_Manager` uses "Require Specific Output Format" to return `{ reply, ready_for_team, project_brief }` on every turn. He keeps discussing/asking questions normally; once he feels he understands the project, he presents a summary (goal, decisions, his own suggestions) in `reply` and asks if the client wants to proceed — `ready_for_team` stays false. Only once the client explicitly confirms does he set `ready_for_team=true` and fill `project_brief` with the complete brief covering the whole conversation. This costs nothing extra (same single call), requires no extra node, and means the team never starts work the client hasn't actually agreed to — solving the "PM only sees the last message" and "where's the link between باجوش and the team" problems with one mechanism, plus adding a confirmation step that didn't exist before for this earlier stage.

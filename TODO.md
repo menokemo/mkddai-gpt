@@ -33,6 +33,14 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Add the real `01C_Intent_Router` Switch node (replace the old placeholder design).
 - [ ] Wire `CHAT` / `ASK_CLARIFICATION` straight to `99_Client_Response`.
 
+## 3b — General Manager → Team Handoff (Project Brief Gate)
+
+- [ ] Enable "Require Specific Output Format" on `00_AI_General_Manager` with schema: `reply` (string), `ready_for_team` (boolean), `project_brief` (string).
+- [ ] Update System Message: present a summary + "ready to hand to the team?" question before setting `ready_for_team=true`; only fill `project_brief` (covering the whole conversation, including باجوش's own suggestions) once the client confirms.
+- [ ] Update `99_Client_Response` to read `output.reply` instead of `output`.
+- [ ] Update `01B_Intent_Analyzer`: if `output.ready_for_team == true`, classify as `NEW_PROJECT` directly.
+- [ ] Update `02A_PM_Agent`'s prompt to read `output.project_brief` instead of the raw latest message.
+
 ## 4 — New Project Path
 
 - [ ] Save Project (Postgres -> `ai_projects`).

@@ -4,6 +4,8 @@
 
 Name: **باجوش** ("Bagoosh"). Introduces itself by this name whenever asked. This is the only agent the client directly talks to; see `CURRENT_STATUS.md` for what it can currently do (web search via SearXNG Tool, conversation-history search Tool, memory, time awareness) and its full system message.
 
+Uses a **structured output** (`Require Specific Output Format`) on every turn: `{ reply, ready_for_team, project_brief }`. He discusses/asks questions normally through `reply`; once he understands a project well enough, `reply` presents a summary (goal, decisions, his own suggestions) and asks the client to confirm, with `ready_for_team` staying `false`. Only after explicit client confirmation does `ready_for_team` become `true` and `project_brief` get filled with the complete brief for the team — see `NEXT_STEPS.md` Step 3b and `DECISIONS_LOG.md` for why.
+
 ## Employee List (planned roster — see `NEXT_STEPS.md` for what's actually built)
 
 ### 1. Project Classifier Agent

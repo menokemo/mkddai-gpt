@@ -67,12 +67,44 @@ Add the actual `01C_Intent_Router` Switch node (not a placeholder) after `01B_In
 - `NEW_PROJECT` -> Step 4.
 - `CONTINUE_PROJECT` -> Step 5.
 
+## Step 3b: General Manager → Team Handoff (Project Brief Gate)
+
+Goal: solve two related problems discovered while building Step 4 live:
+1. PM Agent (and the rest of the team) only ever saw the user's *single latest message*, missing everything discussed earlier in the conversation — including باجوش's own opinions/suggestions during the back-and-forth.
+2. باجوش had no way to hand anything to the team at all — once he replies and the turn ends, there is no node left in that execution to "go back" to him; a brief has to be produced *during* his own reply.
+
+Rejected approaches:
+- Loading the full conversation history into PM Agent's prompt — works, but costs more tokens and adds noise (most of a back-and-forth discussion isn't relevant to the final brief).
+- A separate "summary" node after باجوش — not possible to loop back into the same node, and a *new* node duplicates work باجوش already did during the conversation.
+
+**Adopted approach — structured output on `00_AI_General_Manager` itself, with explicit user confirmation before handoff:**
+
+باجوش keeps discussing/asking questions normally. Once he feels he understands the project well enough, he presents an explicit summary to the client (goal, decisions made, his own suggestions) and asks "ready to hand this to the team?" — and only proceeds once the client confirms.
+
+Implemented via the Agent node's **"Require Specific Output Format"** option (JSON Schema), so every reply from `00_AI_General_Manager` returns:
+
+```json
+{
+  "reply": "the friendly message shown to the client",
+  "ready_for_team": false,
+  "project_brief": ""
+}
+```
+
+- While still discussing: `reply` contains the summary + the "ready to start?" question, `ready_for_team` stays `false`.
+- Only after the client explicitly confirms: `reply` becomes a short friendly acknowledgment ("تمام، هحوّلها للفريق 🚀"), `ready_for_team` becomes `true`, and `project_brief` is filled with a complete brief covering everything agreed across the *whole* conversation (not just the last message) — including باجوش's own opinions given during the discussion. Costs nothing extra — same single call, just asked to also produce this field once ready.
+
+Downstream changes needed:
+- `99_Client_Response`: read `{{ $('00_AI_General_Manager').item.json.output.reply }}` instead of `.output` directly.
+- `01B_Intent_Analyzer`: add a rule — if `output.ready_for_team == true`, classify as `NEW_PROJECT` immediately, skipping the normal heuristics.
+- `02A_PM_Agent`'s prompt: read `{{ $('00_AI_General_Manager').item.json.output.project_brief }}` instead of the raw latest user message.
+
 ## Step 4: New Project Path
 
 ```text
 01C_Intent_Router (NEW_PROJECT)
   -> Save Project (Postgres insert into ai_projects)
-  -> PM Agent (AI Agent: own Model; no memory needed)
+  -> PM Agent (AI Agent: own Model; no memory needed; prompt reads General Manager's project_brief, see Step 3b)
   -> Rename OpenWebUI chat (HTTP Request -> POST /api/v1/chats/{chat_id}, body: {"title": "{emoji} {official project title from PM Agent}"}) — needs an OpenWebUI API key as a credential
   -> Product Analyst Agent (AI Agent: own Model; SearXNG Tool shared if it needs market research)
   -> [if UI is needed] Step 4b: Design Variants Gate
@@ -132,6 +164,8 @@ Small dedicated webhook nodes needed:
 ```
 
 ## Step 6: Confirmation Gate Before Execution
+
+Not the same gate as Step 3b's "ready to hand to team?" confirmation — that one confirms the *initial idea* before the planning team (PM/Product Analyst/Architect/Security) even starts. This gate confirms the *finished technical plan* before any code is actually written.
 
 After Step 4 produces a plan (and before anything is ever written to GitHub/OpenHands), add an explicit confirmation step:
 - Respond to the user with the plan and ask "should I start building this?"
