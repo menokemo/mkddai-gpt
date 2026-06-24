@@ -183,6 +183,8 @@ Goal: since MKDD currently has a single owner/user (not yet multiple external cl
 
 `00_Error_Handler` now ends with: `Error Trigger -> Postgres Insert (ai_agent_runs) -> Telegram (Send Message)`. The Telegram node reads `{{ $json.input_summary }}` (workflow name) and `{{ $json.output_summary }}` (error message) straight from the just-inserted Postgres row — not from `$json.execution.error.message` directly, since that path isn't available on the item by the time it reaches the Telegram node. Confirmed live: a real error notification arrived on Telegram with the correct workflow name and error message.
 
+**Deferred small improvement**: the notification doesn't say *which node* failed yet — only the workflow name and error message. The Error Trigger already has this (`$('Error Trigger').item.json.execution.error.node.name`); just needs to be captured into the Postgres insert (e.g. into the `agent_name` field, instead of the current hardcoded `"00_Error_Handler"`) and added to the Telegram message template. Quick fix, not urgent — revisit when convenient.
+
 Still to add later (other notification points, not yet built):
 - When OpenHands execution finishes (Step 7/8) — "مشروعك جاهز!" instead of the owner needing to check back manually.
 - When QA fails (Step 9).
