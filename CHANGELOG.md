@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-23 (latest) — Telegram error notifications live (Step 14a, error path)
+
+- `00_Error_Handler` now ends with a Telegram "Send Message" node after the Postgres insert, alerting the owner directly with the workflow name + error message.
+- Fixed two bugs along the way: used `update_id` instead of the real `chat.id` (causing "chat not found"), and referenced `execution.error.message` instead of the already-saved `input_summary`/`output_summary` fields (causing an empty message body). See `BUGS_AND_FIXES.md`.
+- Confirmed live: a real, readable error alert arrived on Telegram.
+
 ## 2026-06-23 (latest) — Error Handling done (Step 2 complete)
 
 - Built `00_Error_Handler` workflow: Error Trigger -> Postgres Insert into `ai_agent_runs` (agent_name, workflow name, error message, status=failed).

@@ -103,3 +103,15 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Bug**: Any node failure (OpenRouter timeout, bad response, etc.) anywhere in `ai-factory-v3` left no record and no visibility — just an opaque n8n error response to the caller.
 - **Fix**: Built a separate workflow `00_Error_Handler` (Error Trigger -> Postgres Insert into `ai_agent_runs`), attached as `ai-factory-v3`'s Error Workflow in its settings.
 - **Status**: ✅ Fixed and confirmed live — a failure was logged successfully into `ai_agent_runs`.
+
+### 2026-06-23 — Telegram "chat not found" — used update_id instead of the real chat id
+- **Bug**: Telegram node failed with `Bad Request: chat not found` even though the bot token was valid.
+- **Root cause**: The value used for Chat ID was actually `update_id` (the update's own sequence number) from `getUpdates`, not `message.chat.id` (the real chat identifier) — easy to confuse since both are numbers near the top of the JSON response.
+- **Fix**: Used the correct `chat.id` value from the `getUpdates` response.
+- **Status**: ✅ Fixed and confirmed live.
+
+### 2026-06-23 — Telegram error notification text came out empty
+- **Bug**: The Telegram message template used `{{ $json.execution.error.message }}`, which produced an empty value.
+- **Root cause**: That path isn't present on the item by the time it reaches the Telegram node (it comes after the Postgres Insert node, which doesn't pass through `execution.error.message`).
+- **Fix**: Used `{{ $json.input_summary }}` and `{{ $json.output_summary }}` instead — the same values already saved by the preceding Postgres Insert node, available directly on the item.
+- **Status**: ✅ Fixed and confirmed live — a complete, readable error notification arrived on Telegram.

@@ -179,8 +179,11 @@ Once the Telegram integration (Step 14 below) is built, the owner can ask "what'
 
 Goal: since MKDD currently has a single owner/user (not yet multiple external clients), Telegram serves two purposes for *that owner*: push notifications, and a second, faster mobile entry point into باجوش.
 
-**14a — Push notifications (solves the Async Execution problem from Step 8 directly)**
-Add a Telegram node (no extra trigger needed) at key points in the pipeline to message the owner directly:
+**14a — Push notifications (solves the Async Execution problem from Step 8 directly)** — error-notification path DONE, confirmed live
+
+`00_Error_Handler` now ends with: `Error Trigger -> Postgres Insert (ai_agent_runs) -> Telegram (Send Message)`. The Telegram node reads `{{ $json.input_summary }}` (workflow name) and `{{ $json.output_summary }}` (error message) straight from the just-inserted Postgres row — not from `$json.execution.error.message` directly, since that path isn't available on the item by the time it reaches the Telegram node. Confirmed live: a real error notification arrived on Telegram with the correct workflow name and error message.
+
+Still to add later (other notification points, not yet built):
 - When OpenHands execution finishes (Step 7/8) — "مشروعك جاهز!" instead of the owner needing to check back manually.
 - When QA fails (Step 9).
 - When a new project starts.

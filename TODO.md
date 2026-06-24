@@ -89,8 +89,9 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 14 — Telegram Integration
 
-- [ ] Create Telegram Bot via @BotFather, store token as n8n credential.
-- [ ] **14a — Notifications:** Telegram node at key pipeline points (execution finished, QA failed, new project started, cost threshold crossed).
+- [x] Create Telegram Bot via @BotFather, store token as n8n credential.
+- [x] **14a (error notifications) — DONE, confirmed live:** `00_Error_Handler` now sends a Telegram message with the workflow name + error message after logging to `ai_agent_runs`.
+- [ ] **14a (remaining):** Telegram notifications at other pipeline points (execution finished, QA failed, new project started, cost threshold crossed) — not built yet, those steps don't exist yet either.
 - [ ] **14b — Second entry point:** Telegram Trigger -> normalize to `message`/`chat_id` shape -> `00_AI_General_Manager` -> respond via Telegram node.
 - [ ] **14c — "Get Project Tasks" Tool:** Postgres Tool reading `ai_tasks`, attached to the General Manager; format replies with inline buttons when responding via Telegram.
 
