@@ -103,16 +103,24 @@ Downstream changes needed:
 
 ```text
 01C_Intent_Router (NEW_PROJECT)
-  -> Save Project (Postgres insert into ai_projects)
+  -> Save Project (Postgres insert into ai_projects, status='planning')
   -> PM Agent (AI Agent: own Model; no memory needed; prompt reads General Manager's project_brief, see Step 3b)
-  -> Rename OpenWebUI chat (HTTP Request -> POST /api/v1/chats/{chat_id}, body: {"title": "{emoji} {official project title from PM Agent}"}) — needs an OpenWebUI API key as a credential
+  -> Create Project Repo (GitHub node) + save repo_url into ai_projects + Rename OpenWebUI chat — both use the same official project title PM Agent just decided, done together right after PM Agent (not before it, so the repo/chat name is correct from the start instead of needing a rename later). Needs an OpenWebUI API key as a credential for the chat rename.
+  -> Commit PRD to docs/PRD.md in the repo (GitHub node)
   -> Product Analyst Agent (AI Agent: own Model; SearXNG Tool shared if it needs market research)
+  -> Commit analysis to docs/product_analysis.md
   -> [if UI is needed] Step 4b: Design Variants Gate
   -> Architect Agent (AI Agent: own Model)
+  -> Commit architecture plan to docs/architecture.md
   -> Security Reviewer Agent (AI Agent: own Model) -- reviews the Architect's plan before anything is built
+  -> Commit security review to docs/security_review.md
   -> Save Project Memory (Postgres insert/update into ai_project_memory)
-  -> 99_Client_Response (summary back to the user)
+  -> 99_Client_Response (summary back to the user, includes the repo link, ends with the Confirmation Gate question — see Step 6)
 ```
+
+**Why the repo is created early (right after PM Agent, not at Execution time as originally planned):** the team decided GitHub should be the historical record of the *whole* planning process, not just the final code — matches the existing "GitHub is the source of truth" decision. Each planning agent's output gets committed as it's produced, so the repo tells the full story even before any code exists.
+
+**What happens if the client rejects the plan at Step 6:** the repo created here gets deleted (not left orphaned) — see Step 6 for the rejection flow and the `PROJECT_REJECTED` classification, to be designed when Step 6 itself is built. The `ai_projects` row itself is never deleted even then — see the Permanent Retention Rule in `DECISIONS_LOG.md`.
 
 ### Step 4b: Design Variants Gate (only if the project needs UI)
 
@@ -165,13 +173,16 @@ Small dedicated webhook nodes needed:
 
 ## Step 6: Confirmation Gate Before Execution
 
-Not the same gate as Step 3b's "ready to hand to team?" confirmation — that one confirms the *initial idea* before the planning team (PM/Product Analyst/Architect/Security) even starts. This gate confirms the *finished technical plan* before any code is actually written.
+Not the same gate as Step 3b's "ready to hand to team?" confirmation — that one confirms the *initial idea* before the planning team (PM/Product Analyst/Architect/Security) even starts. This gate confirms the *finished technical plan* before any code is actually written. (Note: by this point the project's GitHub repo already exists with the planning docs committed, per Step 4 — this gate is before *execution*, not before the repo.)
 
-After Step 4 produces a plan (and before anything is ever written to GitHub/OpenHands), add an explicit confirmation step:
-- Respond to the user with the plan and ask "should I start building this?"
-- Only proceed to Step 7 once the next user message confirms (handled by `01B_Intent_Analyzer`/Continue Project path recognizing a confirmation reply).
+After Step 4 produces a plan, add an explicit confirmation step:
+- Respond to the user with the plan summary + repo link and ask "should I start building this?"
+- If approved: update `ai_projects.status = 'approved'`, proceed to Step 7.
+- If rejected: needs a new `01B_Intent_Analyzer` classification (`PROJECT_REJECTED`, or similar) to recognize a rejection reply. On rejection:
+  - Delete the GitHub repo created in Step 4 (GitHub node) — don't leave it orphaned.
+  - Update `ai_projects.status = 'rejected'`. The row itself is never deleted — see the Permanent Retention Rule in `DECISIONS_LOG.md`.
 
-This prevents executing on a misunderstood request.
+This prevents executing on a misunderstood request, and keeps GitHub free of abandoned repos for ideas that didn't pan out.
 
 ## Step 7: Execution Path
 

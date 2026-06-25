@@ -43,10 +43,13 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 4 — New Project Path
 
-- [ ] Save Project (Postgres -> `ai_projects`).
-- [ ] PM Agent.
-- [ ] Rename OpenWebUI chat to `{emoji} {official project title}` via `POST /api/v1/chats/{chat_id}` (needs OpenWebUI API key credential).
-- [ ] Product Analyst Agent (with SearXNG Tool if needed).
+- [ ] Save Project (Postgres -> `ai_projects`, status='planning').
+- [x] PM Agent — built and confirmed live (produces correct PRD).
+- [ ] Create Project Repo (GitHub node) right after PM Agent, using its official title; save `repo_url` into `ai_projects`.
+- [ ] Rename OpenWebUI chat to `{emoji} {official project title}` via `POST /api/v1/chats/{chat_id}` (needs OpenWebUI API key credential) — same time as repo creation, same title.
+- [ ] Commit PRD to `docs/PRD.md` in the repo.
+- [x] Product Analyst Agent — built and confirmed live (produces correct personas/journeys/requirements).
+- [ ] Commit analysis to `docs/product_analysis.md`.
 - [ ] **Design Variants Gate (only if UI is needed):**
 - [x] Add `ai_design_variants` table to the installer schema — done.
   - [ ] UI/UX Designer Agent derives sitemap from PM/Product Analyst output (no invented pages).
@@ -58,10 +61,12 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
   - [ ] Build branded Presentation Page listing all variants with live previews.
   - [ ] Add `GET /choose/:project_id/:variant` webhook to mark chosen/rejected and show confirmation.
   - [ ] Send Presentation Page link to client via `99_Client_Response`.
-- [ ] Architect Agent (uses the chosen variant's HTML as the real starting point).
-- [ ] Security Reviewer Agent (reviews the Architect's plan).
+- [x] Architect Agent — built and confirmed live (produces correct tech stack/folder structure/phases).
+- [ ] Commit architecture plan to `docs/architecture.md`.
+- [x] Security Reviewer Agent — built and confirmed live (produces correct 5-point review + SECURITY_STATUS).
+- [ ] Commit security review to `docs/security_review.md`.
 - [ ] Save Project Memory (Postgres -> `ai_project_memory`).
-- [ ] Response back to user with the plan summary.
+- [ ] Response back to user with the plan summary + repo link, ending with the Step 6 confirmation question.
 
 ## 5 — Continue Project Path
 
@@ -71,7 +76,8 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 ## 6 — Confirmation Gate
 
 - [ ] After the plan is presented (Step 4), explicitly ask the user to confirm before building.
-- [ ] Only proceed to Step 7 on confirmation.
+- [ ] On approval: set `ai_projects.status = 'approved'`, proceed to Step 7.
+- [ ] On rejection: add `01B_Intent_Analyzer` classification for rejection replies; delete the GitHub repo (don't leave it orphaned); set `ai_projects.status = 'rejected'` (row itself never deleted).
 
 ## 7 — Execution Path
 
