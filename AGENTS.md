@@ -4,6 +4,8 @@
 
 Name: **باجوش** ("Bagoosh"). Introduces itself by this name whenever asked. This is the only agent the client directly talks to; see `CURRENT_STATUS.md` for what it can currently do (web search via SearXNG Tool, conversation-history search Tool, memory, time awareness) and its full system message.
 
+Planned (not built yet, see `NEXT_STEPS.md` Step 3c): two more Tools, both implemented as `Call n8n Workflow Tool` sub-workflows so they cost nothing on normal turns and don't require changing باجوش's own model — "Read Attached Document" (pure text extraction, no AI) and "Describe Attached Image" (calls a separate cheap vision model only when an image is actually attached).
+
 Uses a **structured output** (`Require Specific Output Format`) on every turn: `{ reply, ready_for_team, project_brief }`. He discusses/asks questions normally through `reply`; once he understands a project well enough, `reply` presents a summary (goal, decisions, his own suggestions) and asks the client to confirm, with `ready_for_team` staying `false`. Only after explicit client confirmation does `ready_for_team` become `true` and `project_brief` get filled with the complete brief for the team — see `NEXT_STEPS.md` Step 3b and `DECISIONS_LOG.md` for why.
 
 ## Employee List (planned roster — see `NEXT_STEPS.md` for what's actually built)

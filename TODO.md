@@ -33,6 +33,13 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Add the real `01C_Intent_Router` Switch node (replace the old placeholder design).
 - [ ] Wire `CHAT` / `ASK_CLARIFICATION` straight to `99_Client_Response`.
 
+## 3c — File & Image Understanding (deferred until New Project Path is solid)
+
+- [ ] Live test first: upload a real PDF in OpenWebUI and inspect the actual payload reaching n8n — confirm whether OpenWebUI already extracts text itself before building anything.
+- [ ] "Read Attached Document" Tool: `Call n8n Workflow Tool` -> sub-workflow downloads file -> `Extract From File` node (PDF/Word, no AI, no cost) -> returns plain text.
+- [ ] "Describe Attached Image" Tool: `Call n8n Workflow Tool` -> sub-workflow downloads image -> sends to a separate cheap vision-capable model -> returns text description. باجوش's own model stays unchanged.
+- [ ] Update Pipe if needed once the real payload shape (from the live test) is known — current Pipe (v1.0.6) only extracts `type: text` parts.
+
 ## 3b — General Manager → Team Handoff (Project Brief Gate)
 
 - [x] ~~Structured JSON output (`reply`/`ready_for_team`/`project_brief`)~~ — tried live, reverted. Auto-Fix model bypassed باجوش's system message, producing personality-less generic replies whenever the schema didn't match exactly. See `BUGS_AND_FIXES.md`.

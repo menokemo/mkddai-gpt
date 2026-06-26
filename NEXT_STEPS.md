@@ -67,6 +67,22 @@ Add the actual `01C_Intent_Router` Switch node (not a placeholder) after `01B_In
 - `NEW_PROJECT` -> Step 4.
 - `CONTINUE_PROJECT` -> Step 5.
 
+## Step 3c: File & Image Understanding for باجوش (deferred — document now, build after core New Project Path is solid)
+
+Goal: currently باجوش only ever receives plain text from the Pipe — any attached image or document (PDF/Word) is silently dropped before it reaches n8n. Discovered live when a client sent an image and باجوش correctly said he couldn't see it (the Pipe only extracts `type: text` parts, per the v1.0.6 fix). The client wants this fixed for both images and documents, since real project requirements often come as files (a spec PDF, a screenshot of a reference design, etc.).
+
+**Key design insight: both can be Tools on `00_AI_General_Manager`, with zero change to باجوش's own model and zero added cost on normal turns** — same pattern as the SearXNG search Tool, called only when needed:
+
+- **Documents (PDF/Word/etc.) — pure extraction, no AI involved at all:**
+  - n8n's `Call n8n Workflow Tool` lets any node logic be packaged as a single Tool. Build a small sub-workflow: download the file (from OpenWebUI's file storage) -> n8n's built-in `Extract From File` node (handles PDF/Word natively, no API key, no cost) -> return plain text.
+  - Expose that sub-workflow as a Tool named e.g. "Read Attached Document" on باجوش.
+
+- **Images — needs a vision-capable model, but not باجوش's own model:**
+  - Same `Call n8n Workflow Tool` pattern: a sub-workflow downloads the image and sends it to a **separate, cheap vision-capable model** (chosen specifically to keep cost low, not necessarily the same model باجوش uses), asking it to describe the image's relevant content. Returns a plain-text description back to باجوش.
+  - باجوش's own model/cost stays untouched — this only runs (and only costs anything) when an image is actually attached and he decides to use the tool.
+
+**Open question, needs a live test before finalizing:** unconfirmed whether OpenWebUI already extracts document text itself (some versions do automatic RAG on uploads) and sends it pre-extracted in the message, versus just sending a file reference that needs to be fetched and processed as described above. Upload a real PDF and inspect the actual payload that reaches n8n before building this, to avoid building unnecessary extraction logic OpenWebUI might already be doing.
+
 ## Step 3b: General Manager → Team Handoff (Project Brief Gate)
 
 Goal: solve two related problems discovered while building Step 4 live:
