@@ -98,3 +98,11 @@ Originally planned to create the project's GitHub repo only at Execution time (S
 ## Decision: Rejected project plans get their repo deleted, not left orphaned
 
 If the client rejects the finished plan at the Step 6 confirmation gate (after seeing PM/Product Analyst/Architect/Security Reviewer's combined output), the GitHub repo created after PM Agent gets deleted rather than abandoned, to keep GitHub clean. The `ai_projects` row itself is never deleted even then (status becomes `'rejected'`) — see the Permanent Retention Rule above. The exact rejection-detection mechanism (a new Intent Analyzer classification) is designed as part of building Step 6 itself.
+
+## Decision: Reverted structured JSON output on the General Manager — back to plain text
+
+Tried `Require Specific Output Format` (`{ reply, ready_for_team, project_brief }`) on `00_AI_General_Manager` to let it hand a brief to PM Agent in the same call. Reverted after live testing: n8n's Structured Output Parser needs a separate "Auto-Fix" model, and that Auto-Fix call gets sent without باجوش's system message whenever the model's raw output doesn't perfectly match the schema (which happened often) — producing a generic, personality-less reply (no name, no dialect) instead of باجوش. This is a structural fragility of forcing strict JSON onto a conversational agent, not a one-off bug. باجوش now stays plain natural-language text always; the summary he gives the client before asking for confirmation is also what the team reads — no hidden field needed.
+
+## Decision: Per-employee Telegram progress updates instead of a chat per employee
+
+Considered giving each planning agent (PM/Product Analyst/Architect/Security Reviewer) its own Open WebUI chat so the owner could see exactly what each one delivers. Rejected: would require creating real new chats via the OpenWebUI API and tracking multiple chat_ids per project — meaningful added complexity for a single current owner. Adopted instead: a Telegram message right after each agent finishes (reusing the integration from Step 14), with a short summary of what it just decided. The single Open WebUI conversation stays focused on the discussion + final result; Telegram becomes the live progress feed.

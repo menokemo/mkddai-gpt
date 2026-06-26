@@ -35,11 +35,12 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 3b — General Manager → Team Handoff (Project Brief Gate)
 
-- [ ] Enable "Require Specific Output Format" on `00_AI_General_Manager` with schema: `reply` (string), `ready_for_team` (boolean), `project_brief` (string).
-- [ ] Update System Message: present a summary + "ready to hand to the team?" question before setting `ready_for_team=true`; only fill `project_brief` (covering the whole conversation, including باجوش's own suggestions) once the client confirms.
-- [ ] Update `99_Client_Response` to read `output.reply` instead of `output`.
-- [ ] Update `01B_Intent_Analyzer`: if `output.ready_for_team == true`, classify as `NEW_PROJECT` directly.
-- [ ] Update `02A_PM_Agent`'s prompt to read `output.project_brief` instead of the raw latest message.
+- [x] ~~Structured JSON output (`reply`/`ready_for_team`/`project_brief`)~~ — tried live, reverted. Auto-Fix model bypassed باجوش's system message, producing personality-less generic replies whenever the schema didn't match exactly. See `BUGS_AND_FIXES.md`.
+- [x] Removed "Structured Output Parser" node + its Auto-Fix model; turned "Require Specific Output Format" back off.
+- [ ] Restore System Message: plain-text reply where باجوش writes the summary directly when ready, asks "موافق نبدأ نجهزها للفريق؟" in plain language, then gives a short ack once confirmed (no JSON, no hidden fields).
+- [ ] `99_Client_Response`: back to reading `output` directly (no `.reply`).
+- [ ] `01B_Intent_Analyzer`: back to its plain heuristics (no `ready_for_team` field to check).
+- [ ] `02A_PM_Agent`'s prompt: figure out how to reliably point at *the message containing the summary* (not necessarily the latest message) — open design question, test live first.
 
 ## 4 — New Project Path
 
@@ -65,6 +66,7 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 - [ ] Commit architecture plan to `docs/architecture.md`.
 - [x] Security Reviewer Agent — built and confirmed live (produces correct 5-point review + SECURITY_STATUS).
 - [ ] Commit security review to `docs/security_review.md`.
+- [ ] **Step 4c — Telegram progress updates:** add a Telegram "Send Message" node right after each of PM Agent, Product Analyst, Architect, and Security Reviewer, sending a short summary of what that agent just decided.
 - [ ] Save Project Memory (Postgres -> `ai_project_memory`).
 - [ ] Response back to user with the plan summary + repo link, ending with the Step 6 confirmation question.
 

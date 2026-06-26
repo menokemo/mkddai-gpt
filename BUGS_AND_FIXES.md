@@ -115,3 +115,14 @@ This file tracks every bug found during development of MKDD AI Factory, its root
 - **Root cause**: That path isn't present on the item by the time it reaches the Telegram node (it comes after the Postgres Insert node, which doesn't pass through `execution.error.message`).
 - **Fix**: Used `{{ $json.input_summary }}` and `{{ $json.output_summary }}` instead — the same values already saved by the preceding Postgres Insert node, available directly on the item.
 - **Status**: ✅ Fixed and confirmed live — a complete, readable error notification arrived on Telegram.
+
+### 2026-06-25 — `ready_for_team` type drifted from boolean to string on its own
+- **Bug**: After saving the Structured Output Parser's JSON Example schema, the `ready_for_team` field's type had changed from `"boolean"` to `"string"` without anyone editing it directly.
+- **Root cause**: Unconfirmed — possibly an n8n UI quirk when re-opening/re-saving "Generate From JSON Example" schemas. Not investigated further since the whole structured-output approach was reverted (see below).
+- **Status**: Moot — the Structured Output Parser node was removed entirely.
+
+### 2026-06-25 — Structured Output Parser's Auto-Fix bypassed باجوش's personality
+- **Bug**: Whenever `00_AI_General_Manager`'s raw output didn't perfectly match the required JSON schema, n8n's Auto-Fix Format kicked in and returned a generic, personality-less reply — no name (باجوش), no Egyptian dialect, none of the system message's character.
+- **Root cause**: Auto-Fix sends a *separate* correction call containing only the broken output + the schema — not the original system message. This is how n8n's Structured Output Parser works by design, not a one-off bug.
+- **Fix**: Reverted the whole structured-output approach — removed the Output Parser node and its Auto-Fix model, turned `Require Specific Output Format` back off, and went back to plain natural-language replies. See `DECISIONS_LOG.md`.
+- **Status**: ✅ Resolved by removing the fragile mechanism rather than patching it.

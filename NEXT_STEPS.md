@@ -77,46 +77,42 @@ Rejected approaches:
 - Loading the full conversation history into PM Agent's prompt — works, but costs more tokens and adds noise (most of a back-and-forth discussion isn't relevant to the final brief).
 - A separate "summary" node after باجوش — not possible to loop back into the same node, and a *new* node duplicates work باجوش already did during the conversation.
 
-**Adopted approach — structured output on `00_AI_General_Manager` itself, with explicit user confirmation before handoff:**
+**First attempt (tried live, then reverted) — structured JSON output on `00_AI_General_Manager`:**
 
-باجوش keeps discussing/asking questions normally. Once he feels he understands the project well enough, he presents an explicit summary to the client (goal, decisions made, his own suggestions) and asks "ready to hand this to the team?" — and only proceeds once the client confirms.
+Used the Agent node's "Require Specific Output Format" (`{ reply, ready_for_team, project_brief }`) so the model would return both the user-facing reply and a hidden brief in one call. **Reverted after live testing**: n8n's Structured Output Parser needs its own separate "Auto-Fix" model connected, and whenever the model's raw output didn't perfectly match the schema (which happened often), that Auto-Fix call gets sent *without* باجوش's system message at all — producing a generic, personality-less reply (no name, no dialect, no character) instead of باجوش. This wasn't a one-off bug to patch; it's a structural fragility of forcing strict JSON onto a conversational agent. Removed the Output Parser node and its Auto-Fix model entirely, and turned `Require Specific Output Format` back off.
 
-Implemented via the Agent node's **"Require Specific Output Format"** option (JSON Schema), so every reply from `00_AI_General_Manager` returns:
+**Adopted approach — plain natural-language reply, with the summary itself visible to the client:**
 
-```json
-{
-  "reply": "the friendly message shown to the client",
-  "ready_for_team": false,
-  "project_brief": ""
-}
-```
+باجوش keeps replying in plain natural text, exactly as before — no JSON, no schema, no fragility. When he feels he understands the project well enough, he writes the summary itself directly in his normal reply (goal, decisions made, his own suggestions) and asks "ready to hand this to the team?" in plain language. The client sees this summary in the chat — that's fine, it's just transparency, not a downside. Once the client confirms in the next message, his reply is just a short friendly acknowledgment, with no need to repeat the summary.
 
-- While still discussing: `reply` contains the summary + the "ready to start?" question, `ready_for_team` stays `false`.
-- Only after the client explicitly confirms: `reply` becomes a short friendly acknowledgment ("تمام، هحوّلها للفريق 🚀"), `ready_for_team` becomes `true`, and `project_brief` is filled with a complete brief covering everything agreed across the *whole* conversation (not just the last message) — including باجوش's own opinions given during the discussion. Costs nothing extra — same single call, just asked to also produce this field once ready.
-
-Downstream changes needed:
-- `99_Client_Response`: read `{{ $('00_AI_General_Manager').item.json.output.reply }}` instead of `.output` directly.
-- `01B_Intent_Analyzer`: add a rule — if `output.ready_for_team == true`, classify as `NEW_PROJECT` immediately, skipping the normal heuristics.
-- `02A_PM_Agent`'s prompt: read `{{ $('00_AI_General_Manager').item.json.output.project_brief }}` instead of the raw latest user message.
+Downstream consequence: PM Agent's prompt needs to read **the message that actually contained the summary**, not necessarily باجوش's latest reply (which after confirmation is just "تمام، هحوّلها للفريق 🚀" and contains no useful detail). Exact mechanism for locating that message is still open — to be worked out once we see real conversation shapes live (e.g., having `01B_Intent_Analyzer` flag the *summary message itself* the moment it's produced, rather than reasoning about it after the fact from the confirmation message).
 
 ## Step 4: New Project Path
 
 ```text
 01C_Intent_Router (NEW_PROJECT)
   -> Save Project (Postgres insert into ai_projects, status='planning')
-  -> PM Agent (AI Agent: own Model; no memory needed; prompt reads General Manager's project_brief, see Step 3b)
+  -> PM Agent (AI Agent: own Model; no memory needed; prompt reads the General Manager's plain-text summary message, see Step 3b — exact message-selection mechanism still open)
   -> Create Project Repo (GitHub node) + save repo_url into ai_projects + Rename OpenWebUI chat — both use the same official project title PM Agent just decided, done together right after PM Agent (not before it, so the repo/chat name is correct from the start instead of needing a rename later). Needs an OpenWebUI API key as a credential for the chat rename.
   -> Commit PRD to docs/PRD.md in the repo (GitHub node)
+  -> Telegram: "✅ PM Agent خلص" + one-line summary of what it decided (see Step 4c)
   -> Product Analyst Agent (AI Agent: own Model; SearXNG Tool shared if it needs market research)
   -> Commit analysis to docs/product_analysis.md
+  -> Telegram: "✅ Product Analyst خلص" + one-line summary
   -> [if UI is needed] Step 4b: Design Variants Gate
   -> Architect Agent (AI Agent: own Model)
   -> Commit architecture plan to docs/architecture.md
+  -> Telegram: "✅ Architect خلص" + one-line summary (e.g. tech stack chosen)
   -> Security Reviewer Agent (AI Agent: own Model) -- reviews the Architect's plan before anything is built
   -> Commit security review to docs/security_review.md
+  -> Telegram: "✅ Security Reviewer خلص" + one-line summary (pass / what it flagged)
   -> Save Project Memory (Postgres insert/update into ai_project_memory)
   -> 99_Client_Response (summary back to the user, includes the repo link, ends with the Confirmation Gate question — see Step 6)
 ```
+
+### Step 4c: Per-Employee Progress Updates via Telegram
+
+Goal: replace the rejected idea of a separate Open WebUI chat per employee. Telegram already exists (Step 14) and is simpler: one Telegram "Send Message" node right after each planning agent finishes, sending a short message with exactly what that agent decided — not waiting for the whole pipeline to finish. The single Open WebUI conversation stays focused on the discussion + final result; Telegram becomes the live progress feed. Each message just needs that agent's own output summarized in 1-2 lines (the agent's own text can be used directly, or trimmed/excerpted — exact format to be tuned once seen live).
 
 **Why the repo is created early (right after PM Agent, not at Execution time as originally planned):** the team decided GitHub should be the historical record of the *whole* planning process, not just the final code — matches the existing "GitHub is the source of truth" decision. Each planning agent's output gets committed as it's produced, so the repo tells the full story even before any code exists.
 
