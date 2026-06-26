@@ -248,8 +248,11 @@ A Postgres Tool (same pattern as the conversation-history search Tool) reading `
 
 ## Step 9: QA / Revision Loop
 
+Goal (reinforced by team discussion): catch the well-known "vibe coding" failure modes — code that looks complete but doesn't actually build, hallucinated libraries/APIs, security holes, edge cases that break it, inconsistency across files. The bar is "production ready and genuinely sellable," not "looks plausible in a quick demo."
+
 ```text
-QA Agent (AI Agent: own Model) -- includes the No-AI-Fingerprint check, see AGENTS.md
+Run actual install + build + test commands via OpenHands (not just asking it to "write the code") -- capture real logs/output, not a self-report
+  -> QA Agent (AI Agent: own Model) -- reviews the real execution logs together with the code, includes the No-AI-Fingerprint check (see AGENTS.md). A project that fails to install/build/test is an automatic fail regardless of how the code reads.
   -> Switch (PASS / FAIL)
        PASS -> Step 10
        FAIL -> Revision Agent (AI Agent: own Model) -> back to Step 7's GitHub/OpenHands step with a correction brief

@@ -167,13 +167,17 @@ Executes code in the repo.
 
 ### 14. QA Agent
 
+**Must be execution-based, not text-only review.** Reading code and judging whether it "looks right" is not enough — it misses hallucinated libraries/APIs that don't actually exist, code that only works on the happy path, and broken cross-file consistency. The QA Agent's review is built on top of *real evidence* from actually running the project (via OpenHands): dependency install, build, and test execution logs. A project that "looks fine" but fails to install or build is an automatic fail — no text-only judgment overrides that.
+
 Outputs:
 
 ```text
 QA_STATUS: pass/fail
 ```
 
-And lists problems and required fixes.
+And lists problems and required fixes, grounded in the actual execution output (install/build/test logs), not impressions from reading the code alone.
+
+This exists specifically to guard against the well-known "vibe coding" failure mode — AI-generated projects that look complete and run in a narrow happy-path demo but are actually broken, insecure, or built on libraries/APIs that don't exist. The team's goal is projects real enough to actually sell, not just demo-able.
 
 Must include, as a formal check item, whether the code, comments, README, or commit messages contain any direct or indirect reference to AI authorship. If found, QA_STATUS must be `fail` and it must be listed as a required fix.
 

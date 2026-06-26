@@ -114,7 +114,8 @@ Flat checklist version of `NEXT_STEPS.md`, in the order to actually do them. Che
 
 ## 9 — QA / Revision Loop
 
-- [ ] QA Agent — include No-AI-Fingerprint check (see `AGENTS.md`).
+- [ ] Run real install + build + test commands via OpenHands — capture actual logs, not a self-report.
+- [ ] QA Agent — reviews real execution logs + code together; include No-AI-Fingerprint check (see `AGENTS.md`). Failed install/build/test = automatic fail.
 - [ ] Switch on `QA_STATUS` (pass/fail).
 - [ ] Revision Agent on fail -> back to Step 7 with a correction brief.
 - [ ] Save QA Report (Postgres -> `ai_qa_reports`).

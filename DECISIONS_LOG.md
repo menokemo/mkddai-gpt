@@ -106,3 +106,9 @@ Tried `Require Specific Output Format` (`{ reply, ready_for_team, project_brief 
 ## Decision: Per-employee Telegram progress updates instead of a chat per employee
 
 Considered giving each planning agent (PM/Product Analyst/Architect/Security Reviewer) its own Open WebUI chat so the owner could see exactly what each one delivers. Rejected: would require creating real new chats via the OpenWebUI API and tracking multiple chat_ids per project — meaningful added complexity for a single current owner. Adopted instead: a Telegram message right after each agent finishes (reusing the integration from Step 14), with a short summary of what it just decided. The single Open WebUI conversation stays focused on the discussion + final result; Telegram becomes the live progress feed.
+
+## Decision: QA must be execution-based, not text-only review — guarding against "vibe coding" failures
+
+The team's explicit goal is producing projects real enough to actually sell — "production ready," not just demo-able. Discussion specifically named known AI-generated-code failure modes: hallucinated libraries/APIs that don't exist, code that only works on a narrow happy path, hidden security holes, and inconsistency across files when a project is built in separate stages. A QA Agent that only reads code and judges whether it "looks right" misses all of these.
+
+Decision: QA Agent's review is grounded in *real execution evidence* — actual install, build, and test commands run via OpenHands, with the real logs/output fed into the QA Agent alongside the code. A project that fails to install or build is an automatic fail regardless of how plausible the code reads. This applies on top of the existing checks (Security Reviewer at the planning stage, No-AI-Fingerprint at QA and Delivery) — none of those replace actually running the thing.
