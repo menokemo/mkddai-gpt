@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-06-27 — CRITICAL FIX: per-chat memory isolation was never working (Pipe v1.0.7)
+
+- Found and fixed the root cause of a severe bug: every conversation since day one shared one combined memory under `session_id = "default"`, because the Pipe read `chat_id` from `body` (not present there) instead of Open WebUI's reserved `__chat_id__` argument.
+- Pipe updated to v1.0.7: `async def pipe(self, body: dict, __chat_id__: str = None)`. Confirmed live — two different conversations now get two distinct chat_ids.
+- Cleaned up: deleted 862 contaminated rows (`DELETE FROM n8n_chat_histories WHERE session_id = 'default'`) and cleared Open WebUI's chat history for a fresh start.
+- Also found and mitigated (capped with `Max Iterations: 2`) a separate, upstream n8n core bug where the AI Agent node loops re-calling the model even after a valid response — confirmed against a public n8n GitHub issue, not something fixable from our side.
+- See `BUGS_AND_FIXES.md` for full technical detail on both.
+
 ## 2026-06-23 (latest) — Telegram error notifications live (Step 14a, error path)
 
 - `00_Error_Handler` now ends with a Telegram "Send Message" node after the Postgres insert, alerting the owner directly with the workflow name + error message.

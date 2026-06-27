@@ -363,7 +363,7 @@ cat > "$APP_DIR/docs/openwebui_ai_factory_pipe.py" <<'EOF'
 """
 title: AI Factory
 author: MKDD
-version: 1.0.4
+version: 1.0.7
 description: Send real user project requests from Open WebUI to n8n AI Factory workflow.
 requirements: requests
 """
@@ -372,21 +372,27 @@ import requests
 
 
 class Pipe:
-    def __init__(self):
-        self.name = "AI Factory"
-        self.webhook_url = "http://YOUR_SERVER_IP:5678/webhook/ai-factory-v3"
-        # Copy the AI_FACTORY_WEBHOOK_SECRET value printed at the end of the
-        # installer (also saved in /opt/ai-factory/.env) into this field.
-        self.webhook_secret = "YOUR_WEBHOOK_SECRET"
+    name = "AI Factory"
+    webhook_url = "http://YOUR_SERVER_IP:5678/webhook/ai-factory-v3"
+    # Copy the AI_FACTORY_WEBHOOK_SECRET value printed at the end of the
+    # installer (also saved in /opt/ai-factory/.env) into this field.
+    webhook_secret = "YOUR_WEBHOOK_SECRET"
 
-    async def pipe(self, body: dict) -> str:
+    async def pipe(self, body: dict, __chat_id__: str = None) -> str:
         messages = body.get("messages", [])
-        user_message = ""
+        raw_content = messages[-1].get("content", "") if messages else ""
 
-        if messages:
-            user_message = messages[-1].get("content", "") or ""
-
-        user_message = user_message.strip()
+        # OpenWebUI sends content as a list of parts (text + images) when an
+        # image is attached, instead of a plain string. Extract text parts.
+        if isinstance(raw_content, list):
+            text_parts = [
+                part.get("text", "")
+                for part in raw_content
+                if isinstance(part, dict) and part.get("type") == "text"
+            ]
+            user_message = " ".join(text_parts).strip()
+        else:
+            user_message = (raw_content or "").strip()
 
         internal_prefixes = [
             "### Task:",
@@ -401,11 +407,16 @@ class Pipe:
         if not user_message:
             return ""
 
-        chat_id = body.get("chat_id") or body.get("id") or "default"
+        # IMPORTANT: chat_id is NOT inside body for a basic Pipe - OpenWebUI
+        # passes it via the reserved __chat_id__ argument above. Reading it
+        # from body (e.g. body.get("chat_id")) silently falls back to None
+        # every time, which previously caused every conversation to share
+        # one combined memory. See BUGS_AND_FIXES.md for the full story.
+        chat_id = __chat_id__ or "default"
 
         payload = {
             "message": user_message,
-            "chat_title": body.get("title") or body.get("chat_id") or "Open WebUI Project",
+            "chat_title": chat_id,
             "chat_id": chat_id,
         }
 
