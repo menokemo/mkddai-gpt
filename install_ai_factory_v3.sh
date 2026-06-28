@@ -175,6 +175,19 @@ CREATE TABLE IF NOT EXISTS ai_token_usage (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- General Manager -> Team handoff ("hand-to-hand" delivery, not guessing from
+-- chat history). Always holds the LATEST summary باجوش gave the client for
+-- this chat - overwritten every CHAT/ASK_CLARIFICATION turn, and deliberately
+-- NOT touched on the turn where the client confirms (NEW_PROJECT), so it
+-- still holds the real summary the client actually agreed to when PM Agent
+-- reads it right after. See BUGS_AND_FIXES.md for why this replaced reading
+-- n8n_chat_histories with a guessed LIMIT.
+CREATE TABLE IF NOT EXISTS ai_pending_briefs (
+    chat_id TEXT PRIMARY KEY,
+    brief_text TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS n8n_chat_histories (
     id SERIAL PRIMARY KEY,
     session_id VARCHAR(255) NOT NULL,
